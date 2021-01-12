@@ -1,0 +1,138 @@
+#region Copyright & License
+
+# Copyright © 2012 - 2020 François Chabot
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#endregion
+
+parameters:
+  - name: ProjectOrSolutionPath
+    type: string
+  - name: Major
+    type: number
+  - name: Minor
+    type: number
+  - name: Configuration
+    type: string
+    values:
+      - Debug
+      - Release
+  - name: SkipTest
+    type: boolean
+  - name: SkipBuildArtifactPackagingAndPublication
+    type: boolean
+  - name: BuildEngine
+    type: string
+    values:
+      - dotnet
+      - msbuild
+    default: dotnet
+  - name: TestEngine
+    type: string
+    values:
+      - dotnet
+      - vstest
+    default: dotnet
+
+stages:
+  - stage: build
+    displayName: "Build stage"
+    jobs:
+      - job: prepare
+        displayName: "Prepare"
+        steps:
+          - checkout: none
+
+          - template: /Steps/generate-build-number.yml
+            parameters:
+              Major: ${{ parameters.Major }}
+              Minor: ${{ parameters.Minor }}
+
+      - job: build
+        displayName: "Compile, test, and pack"
+        pool:
+          vmImage: "windows-latest"
+        dependsOn: prepare
+        condition: succeeded()
+        variables:
+          VersionBuild: $[ dependencies.prepare.outputs['generateBuildNumber.VersionBuild'] ]
+          VersionRevision: $[ dependencies.prepare.outputs['generateBuildNumber.VersionRevision'] ]
+          PrivateSigningKeyPath: ""
+        steps:
+          - checkout: self
+            submodules: true
+
+          - template: /Steps/download-private-signing-key.yml
+
+          - template: /Steps/dotnet-restore.yml
+            parameters:
+              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+
+          - ${{ if eq(parameters.BuildEngine, 'dotnet') }}:
+              - template: /Steps/dotnet-build.yml
+                parameters:
+                  ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                  Configuration: ${{ parameters.Configuration }}
+                  Major: ${{ parameters.Major }}
+                  Minor: ${{ parameters.Minor }}
+
+          - ${{ if eq(parameters.BuildEngine, 'msbuild') }}:
+              - template: /Steps/msbuild-build.yml
+                parameters:
+                  ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                  Configuration: ${{ parameters.Configuration }}
+                  Major: ${{ parameters.Major }}
+                  Minor: ${{ parameters.Minor }}
+
+          - ${{ if eq(parameters.SkipTest, false) }}:
+              - ${{ if eq(parameters.TestEngine, 'dotnet') }}:
+                  - template: /Steps/dotnet-test.yml
+                    parameters:
+                      ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                      Configuration: ${{ parameters.Configuration }}
+                  - template: /Steps/generate-and-publish-code-coverage-report.yml
+              - ${{ if eq(parameters.TestEngine, 'vstest') }}:
+                  - template: /Steps/dotnet-vstest.yml
+                    parameters:
+                      ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                      Configuration: ${{ parameters.Configuration }}
+
+          - ? ${{ if eq(parameters.SkipBuildArtifactPackagingAndPublication, false) }}
+            : - template: /Steps/dotnet-pack.yml
+                parameters:
+                  Configuration: ${{ parameters.Configuration }}
+
+              - template: /Steps/publish-build-artifact.yml
+                parameters:
+                  ArtifactName: "nugetPackage"
+                  PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
+
+      - job: analyzeCode
+        displayName: "Analyze code"
+        dependsOn: prepare
+        condition: succeeded()
+        pool:
+          vmImage: "windows-latest"
+        steps:
+          - checkout: self
+            submodules: true
+
+          - template: /Steps/dotnet-restore.yml
+            parameters:
+              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+
+          - template: /Steps/analyze-code-with-resharper.yml
+            parameters:
+              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+              Configuration: ${{ parameters.Configuration }}
