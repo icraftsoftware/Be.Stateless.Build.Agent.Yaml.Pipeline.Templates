@@ -13,8 +13,6 @@
 # limitations under the License.
 
 parameters:
-  - name: ProjectOrSolutionPath
-    type: string
   - name: Configuration
     type: string
     values:
@@ -31,34 +29,11 @@ steps:
         !**\*TestAdapter.dll
         !**\obj\**
       searchFolder: "$(build.sourcesdirectory)"
+  #TODO use corvelet
   - task: PublishTestResults@2
     displayName: Publish test results (${{ parameters.Configuration }})
     inputs:
       testResultsFormat: "XUnit"
       testResultsFiles: "**/TEST-*.xml"
       mergeTestResults: true
-  # - task: DotNetCoreCLI@2
-  #   displayName: dotnet vstest (${{ parameters.Configuration }})
-  #   inputs:
-  #     command: custom
-  #     custom: vstest
-  #     projects: "$(build.sourcesdirectory)/**/*.Tests.dll"
-  #TODO
-  #arguments: "/p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./results/coverage.cobertura.xml"
-  # TODO : Should be replaced when PublishCodeCoverageResults task will supports multiple files.
-  # - task: reportgenerator@4
-  #   displayName: generate code coverage report
-  #   inputs:
-  #     reports: '$(build.sourcesdirectory)/**/coverage.*.xml'
-  #     targetdir: 'coverage'
-  #     reporttypes: "HtmlInline_AzurePipelines;Cobertura;Badges"
-  #     assemblyfilters: "-xunit*"
-  #     verbosity: "Info" # Verbose, Info, Warning, Error, Off
 
-  # - task: PublishCodeCoverageResults@1
-  #   displayName: publish code coverage report
-  #   inputs:
-  #     codeCoverageTool: Cobertura
-  #     summaryFileLocation: '$(build.sourcesdirectory)\coverage\cobertura.xml'
-  #     reportDirectory: '$(build.sourcesdirectory)\coverage'
-  #     failIfCoverageEmpty: false

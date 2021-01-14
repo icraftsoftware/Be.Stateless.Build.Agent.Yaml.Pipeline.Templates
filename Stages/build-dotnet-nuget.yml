@@ -103,7 +103,7 @@ stages:
                       Configuration: ${{ parameters.Configuration }}
                   - template: /Steps/generate-and-publish-code-coverage-report.yml
               - ${{ if eq(parameters.TestEngine, 'vstest') }}:
-                  - template: /Steps/dotnet-vstest.yml
+                  - template: /Steps/vstest.yml
                     parameters:
                       ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
                       Configuration: ${{ parameters.Configuration }}
