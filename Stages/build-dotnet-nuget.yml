@@ -28,22 +28,22 @@ parameters:
     values:
       - Debug
       - Release
-  - name: SkipTest
-    type: boolean
-  - name: SkipBuildArtifactPackagingAndPublication
-    type: boolean
   - name: BuildEngine
     type: string
     values:
       - dotnet
       - msbuild
     default: dotnet
+  - name: SkipTest
+    type: boolean
   - name: TestEngine
     type: string
     values:
       - dotnet
       - vstest
     default: dotnet
+  - name: SkipBuildArtifactPackagingAndPublication
+    type: boolean
 
 stages:
   - stage: build
