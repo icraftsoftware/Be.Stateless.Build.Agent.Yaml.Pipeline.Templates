@@ -30,8 +30,10 @@ stages:
           - template: /Steps/download-build-artifact.yml
             parameters:
               ArtifactName: "nugetPackage"
-              DownloadPath: "$(System.ArtifactsDirectory)"
+              DownloadPath: "$(System.ArtifactsDirectory)/nuget-packages"
 
           - template: /Steps/create-github-release.yml
 
           - template: /Steps/nuget-push-to-nuget-org.yml
+            parameters:
+              Path: "$(System.ArtifactsDirectory)/nuget-packages"
