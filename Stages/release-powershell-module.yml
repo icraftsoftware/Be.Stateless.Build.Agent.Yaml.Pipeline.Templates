@@ -34,8 +34,8 @@ stages:
 
           - template: /Steps/download-build-artifact.yml
             parameters:
-              ArtifactName: "powershellModule"
-              DownloadPath: "$(System.ArtifactsDirectory)"
+              ArtifactName: "powershellModules"
+              DownloadPath: "$(System.ArtifactsDirectory)/powershellModules"
 
           # required by implicit Test-ModuleManifest upon module publication
           - template: /Steps/restore-required-powershell-modules.yml
@@ -43,3 +43,5 @@ stages:
           - template: /Steps/create-github-release.yml
 
           - template: /Steps/publish-powershell-module.yml
+            parameters:
+              ModulePath: "$(System.ArtifactsDirectory)/powershellModules"

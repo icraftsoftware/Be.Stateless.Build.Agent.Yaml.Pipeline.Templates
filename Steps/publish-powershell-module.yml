@@ -15,10 +15,13 @@
 # limitations under the License.
 
 #endregion
+parameters:
+  - name: ModulePath
+    type: string
 
 steps:
   - task: PowerShell@2
     inputs:
       filePath: '$(Build.SourcesDirectory)\.build\pwsh\push.ps1'
-      arguments: '-Path "$(System.ArtifactsDirectory)/powershellModule" -NuGetApiKey $(powershell-gallery-api-key)'
+      arguments: '-Path "${{ parameters.ModulePath }}" -NuGetApiKey $(powershell-gallery-api-key)'
     displayName: publish PowerShell module on PowerShell Gallery
