@@ -23,32 +23,43 @@ parameters:
     type: number
   - name: Minor
     type: number
-  - name: SkipTest
-    type: boolean
-    default: false
   - name: BuildEngine
     type: string
     values:
       - dotnet
       - msbuild
     default: dotnet
+  - name: SkipTest
+    type: boolean
+    default: false
   - name: TestEngine
     type: string
     values:
       - dotnet
       - vstest
     default: dotnet
+  - name: SkipNuGetPackaging
+    type: boolean
+    default: false
+  - name: ProjectsToPublishAsPowerShellModuleArtifact
+    type: object
+    default: []
 
 stages:
-  - template: /Stages/build-dotnet-nuget.yml
+  - template: /Stages/build-dotnet.yml
     parameters:
       ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
       Major: ${{ parameters.Major }}
       Minor: ${{ parameters.Minor }}
       Configuration: Release
-      SkipTest: ${{ parameters.SkipTest }}
-      SkipBuildArtifactPackagingAndPublication: false
       BuildEngine: ${{ parameters.BuildEngine }}
+      SkipTest: ${{ parameters.SkipTest }}
       TestEngine: ${{ parameters.TestEngine }}
+      SkipBuildArtifactPackagingAndPublication: false
+      SkipNuGetPackaging: ${{ parameters.SkipNuGetPackaging }}
+      ProjectsToPublishAsPowerShellModuleArtifact: ${{ parameters.ProjectsToPublishAsPowerShellModuleArtifact }}
 
-  - template: /Stages/release-nuget.yml
+  - template: /Stages/release-dotnet.yml
+    parameters:
+      PublishNuGetPackages: ${{ not(parameters.SkipNuGetPackaging) }}
+      PublishPowerShellModules: ${{ gt(length(parameters.ProjectsToPublishAsPowerShellModuleArtifact), 0) }}

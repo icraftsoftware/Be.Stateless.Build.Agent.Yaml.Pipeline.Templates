@@ -24,7 +24,7 @@ parameters:
 
 steps:
   - task: DownloadBuildArtifacts@0
-    displayName: download nuget build artifact
+    displayName: download build artifact '${{ parameters.ArtifactName }}'
     inputs:
       buildType: "current"
       downloadType: "single"

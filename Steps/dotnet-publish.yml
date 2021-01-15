@@ -17,15 +17,24 @@
 #endregion
 
 parameters:
-  - name: ArtifactName
+  - name: ProjectPath
     type: string
-  - name: PathToPublish
+  - name: Configuration
+    type: string
+    values:
+      - Debug
+      - Release
+  - name: OutputPath
     type: string
 
 steps:
-  - task: PublishBuildArtifacts@1
-    displayName: publish build artifact '${{ parameters.ArtifactName }}'
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet publish (${{ parameters.Configuration }})'
     inputs:
-      PathtoPublish: ${{ parameters.PathToPublish }}
-      ArtifactName: ${{ parameters.ArtifactName }}
-      publishLocation: "Container"
+      command: publish
+      projects: "${{ parameters.ProjectPath }}"
+      configuration: "${{ parameters.Configuration }}"
+      nobuild: true
+      arguments: "--configuration ${{ parameters.Configuration }} --output ${{ parameters.OutputPath }}"
+      publishWebProjects: false
+      zipAfterPublish: false

@@ -22,6 +22,8 @@ parameters:
     values:
       - Debug
       - Release
+  - name: OutputPath
+    type: string
 
 steps:
   - task: DotNetCoreCLI@2
@@ -30,7 +32,7 @@ steps:
       command: "pack"
       packagesToPack: "**/*.csproj"
       configuration: "${{ parameters.Configuration }}"
-      packDirectory: "$(build.artifactstagingdirectory)/packages"
+      packDirectory: "${{ parameters.OutputPath }}"
       nobuild: true
       includesymbols: true
       versioningScheme: "byBuildNumber"

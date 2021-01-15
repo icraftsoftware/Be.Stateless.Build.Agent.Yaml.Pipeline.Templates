@@ -44,10 +44,18 @@ parameters:
     default: dotnet
   - name: SkipBuildArtifactPackagingAndPublication
     type: boolean
+  - name: SkipNuGetPackaging
+    type: boolean
+  - name: ProjectsToPublishAsPowerShellModuleArtifact
+    type: object
 
 stages:
   - stage: build
     displayName: "Build stage"
+    variables:
+      - name: "CodeSigningCertificatePath"
+        value: ""
+      - group: "code-signing-certificates"
     jobs:
       - job: prepare
         displayName: "Prepare"
@@ -109,30 +117,52 @@ stages:
                       Configuration: ${{ parameters.Configuration }}
 
           - ? ${{ if eq(parameters.SkipBuildArtifactPackagingAndPublication, false) }}
-            : - template: /Steps/dotnet-pack.yml
-                parameters:
-                  Configuration: ${{ parameters.Configuration }}
+            : - ${{ if eq(parameters.SkipNuGetPackaging, false) }}:
+                  - template: /Steps/dotnet-pack.yml
+                    parameters:
+                      Configuration: ${{ parameters.Configuration }}
+                      OutputPath: "$(build.artifactstagingdirectory)/packages"
 
-              - template: /Steps/publish-build-artifact.yml
-                parameters:
-                  ArtifactName: "nugetPackage"
-                  PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
+                  - template: /Steps/publish-build-artifact.yml
+                    parameters:
+                      ArtifactName: "nugetPackages"
+                      PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
 
-      - job: analyzeCode
-        displayName: "Analyze code"
-        dependsOn: prepare
-        condition: succeeded()
-        pool:
-          vmImage: "windows-latest"
-        steps:
-          - checkout: self
-            submodules: true
+              - ? ${{ if gt(length(parameters.ProjectsToPublishAsPowerShellModuleArtifact), 0) }}
+                : - ? ${{ each project in parameters.ProjectsToPublishAsPowerShellModuleArtifact }}
+                    : - template: /Steps/dotnet-publish.yml
+                        parameters:
+                          ProjectPath: ${{ project }}
+                          Configuration: ${{ parameters.Configuration }}
+                          OutputPath: "$(Agent.TempDirectory)/temp"
 
-          - template: /Steps/dotnet-restore.yml
-            parameters:
-              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                  - template: /Steps/download-private-code-signing-certificate.yml
 
-          - template: /Steps/analyze-code-with-resharper.yml
-            parameters:
-              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
-              Configuration: ${{ parameters.Configuration }}
+                  - template: /Steps/build-powershell-modules.yml
+                    parameters:
+                      Path: "$(Agent.TempDirectory)/temp"
+                      OutputPath: "$(Build.ArtifactStagingDirectory)\\powershell-modules"
+
+                  - template: /Steps/publish-build-artifact.yml
+                    parameters:
+                      ArtifactName: "powerShellModules"
+                      PathToPublish: "$(Build.ArtifactStagingDirectory)\\powershell-modules"
+
+      # - job: analyzeCode
+      #   displayName: "Analyze code"
+      #   dependsOn: prepare
+      #   condition: succeeded()
+      #   pool:
+      #     vmImage: "windows-latest"
+      #   steps:
+      #     - checkout: self
+      #       submodules: true
+
+      #     - template: /Steps/dotnet-restore.yml
+      #       parameters:
+      #         ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+
+      #     - template: /Steps/analyze-code-with-resharper.yml
+      #       parameters:
+      #         ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+      #         Configuration: ${{ parameters.Configuration }}

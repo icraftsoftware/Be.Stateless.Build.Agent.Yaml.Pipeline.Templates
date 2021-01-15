@@ -20,7 +20,7 @@ steps:
   - task: GitHubRelease@1
     displayName: create github release
     inputs:
-      gitHubConnection: "github.com_icraftsoftware"
+      gitHubConnection: "emmanuelbenitez"
       repositoryName: "$(Build.Repository.Name)"
       action: "create"
       target: "$(Build.SourceVersion)"

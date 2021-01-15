@@ -56,5 +56,5 @@ stages:
               - template: /Steps/build-powershell-module.yml
               - template: /Steps/publish-build-artifact.yml
                 parameters:
-                  ArtifactName: "powershellModule"
+                  ArtifactName: "powershellModules"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)"

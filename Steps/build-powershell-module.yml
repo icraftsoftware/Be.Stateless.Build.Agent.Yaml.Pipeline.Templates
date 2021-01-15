@@ -18,7 +18,7 @@
 
 steps:
   - task: PowerShell@2
+    displayName: build PowerShell module
     inputs:
       filePath: '$(Build.SourcesDirectory)\.build\pwsh\build.ps1'
       arguments: '-Path $(Build.SourcesDirectory) -Destination $(Build.ArtifactStagingDirectory) -ModuleVersion $(Build.BuildNumber) -CertificateFilePath $(CodeSigningCertificatePath) -CertificatePassword $(ConvertTo-SecureString "$(be-stateless-certificate-password)" -AsPlainText -Force)'
-    displayName: build PowerShell module
