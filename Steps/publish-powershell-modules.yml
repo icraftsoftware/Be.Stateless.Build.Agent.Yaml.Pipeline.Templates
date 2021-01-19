@@ -15,18 +15,16 @@
 # limitations under the License.
 
 #endregion
-
 parameters:
-  - name: Path
+  - name: ModulesPath
     type: string
 
 steps:
-  - task: NuGetCommand@2
-    displayName: nuget push
-    inputs:
-      command: "push"
-      packagesToPush: "${{ parameters.Path }}/**/*.nupkg;!${{ parameters.Path }}/**/*.symbols.nupkg"
-      publishVstsFeed: 'be.stateless/Internal-Test-Feed'
-      #nuGetFeedType: "external"
-      #publishFeedCredentials: "nuget.org_be.stateless"
-      verbosityPush: "Normal"
+  - powershell: |
+      $modules = Get-ChildItem -Path ${{ parameters.ModulesPath }} -Directory
+      $modules | ForEach-Object -Process {
+        Write-Information "Publish PowerShell module '$_'" -InformationAction Continue
+        $(Build.SourcesDirectory)\.build\pwsh\push.ps1 -Path $_.FullName -NuGetApiKey $(powershell-gallery-api-key)
+      }
+    displayName: publish powershell modules
+    name: publishPowerShellModules

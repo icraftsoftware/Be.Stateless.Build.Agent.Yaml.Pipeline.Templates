@@ -140,7 +140,7 @@ stages:
 
                   - template: /Steps/build-powershell-modules.yml
                     parameters:
-                      Path: "$(Agent.TempDirectory)/temp"
+                      ModulesPath: "$(Agent.TempDirectory)/temp"
                       OutputPath: "$(Build.ArtifactStagingDirectory)\\powershell-modules"
 
                   - template: /Steps/publish-build-artifact.yml

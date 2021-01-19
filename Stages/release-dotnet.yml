@@ -27,11 +27,16 @@ stages:
     displayName: "Release stage"
     dependsOn: build
     condition: succeeded()
+    variables:
+      - group: "powershell-gallery"
     jobs:
       - job: publish
+        pool:
+          vmImage: "windows-latest"
         displayName: "Create github release, publish package on nuget.org and publish pwsh modules on PowerShell Gallery"
         steps:
-          - checkout: none
+          - checkout: self
+            submodules: true
 
           - template: /Steps/create-github-release.yml
 
@@ -41,12 +46,16 @@ stages:
                   ArtifactName: "nugetPackages"
                   DownloadPath: "$(System.ArtifactsDirectory)"
 
-            # - template: /Steps/nuget-push-to-nuget-org.yml
-            #   parameters:
-            #     Path: "$(System.ArtifactsDirectory)/nugetPackages"
+              - template: /Steps/nuget-push-to-nuget-org.yml
+                parameters:
+                  Path: "$(System.ArtifactsDirectory)/nugetPackages"
 
           - ${{ if eq(parameters.PublishPowerShellModules, true) }}:
               - template: /Steps/download-build-artifact.yml
                 parameters:
                   ArtifactName: "powerShellModules"
                   DownloadPath: "$(System.ArtifactsDirectory)"
+
+              - template: /Steps/publish-powershell-modules.yml
+                parameters:
+                  ModulesPath: "$(System.ArtifactsDirectory)/powerShellModules"

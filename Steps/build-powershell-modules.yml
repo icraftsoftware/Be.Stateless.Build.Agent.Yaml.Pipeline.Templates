@@ -16,7 +16,7 @@
 
 #endregion
 parameters:
-  - name: Path
+  - name: ModulesPath
     type: string
   - name: OutputPath
     type: string
@@ -26,10 +26,10 @@ steps:
       if (-not (Test-Path -LiteralPath ${{ parameters.OutputPath }})) {
         New-Item -Path ${{ parameters.OutputPath }} -ItemType Directory -ErrorAction Stop | Out-Null
       }
-      $modules = Get-ChildItem -Path ${{ parameters.Path }} -Directory
+      $modules = Get-ChildItem -Path ${{ parameters.ModulesPath }} -Directory
       $modules | ForEach-Object -Process {
-        Write-Information "Build PowerShell modules from $_.FullName" -InformationAction Continue
+        Write-Information "Build PowerShell module '$_'" -InformationAction Continue
         $(Build.SourcesDirectory)\.build\pwsh\build.ps1 -Path $_.FullName -Destination '${{ parameters.OutputPath }}' -ModuleVersion $(Build.BuildNumber) -CertificateFilePath $(CodeSigningCertificatePath) -CertificatePassword $(ConvertTo-SecureString "$(be-stateless-certificate-password)" -AsPlainText -Force)
       }
     displayName: build powershell modules
-    name: generateBuildNumber
+    name: buildPowerShellModules
