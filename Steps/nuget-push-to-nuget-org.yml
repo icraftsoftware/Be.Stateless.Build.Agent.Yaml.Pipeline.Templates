@@ -26,6 +26,7 @@ steps:
     inputs:
       command: "push"
       packagesToPush: "${{ parameters.Path }}/**/*.nupkg"
-      nuGetFeedType: "external"
-      publishFeedCredentials: "nuget.org_be.stateless"
+      publishVstsFeed: 'be.stateless/Internal-Test-Feed'
+      #nuGetFeedType: "external"
+      #publishFeedCredentials: "nuget.org_be.stateless"
       verbosityPush: "Normal"
