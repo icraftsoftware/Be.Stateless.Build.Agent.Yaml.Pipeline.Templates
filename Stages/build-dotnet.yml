@@ -148,21 +148,21 @@ stages:
                       ArtifactName: "powerShellModules"
                       PathToPublish: "$(Build.ArtifactStagingDirectory)\\powershell-modules"
 
-      # - job: analyzeCode
-      #   displayName: "Analyze code"
-      #   dependsOn: prepare
-      #   condition: succeeded()
-      #   pool:
-      #     vmImage: "windows-latest"
-      #   steps:
-      #     - checkout: self
-      #       submodules: true
+      - job: analyzeCode
+        displayName: "Analyze code"
+        dependsOn: prepare
+        condition: succeeded()
+        pool:
+          vmImage: "windows-latest"
+        steps:
+          - checkout: self
+            submodules: true
 
-      #     - template: /Steps/dotnet-restore.yml
-      #       parameters:
-      #         ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+          - template: /Steps/dotnet-restore.yml
+            parameters:
+              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
 
-      #     - template: /Steps/analyze-code-with-resharper.yml
-      #       parameters:
-      #         ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
-      #         Configuration: ${{ parameters.Configuration }}
+          - template: /Steps/analyze-code-with-resharper.yml
+            parameters:
+              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+              Configuration: ${{ parameters.Configuration }}
