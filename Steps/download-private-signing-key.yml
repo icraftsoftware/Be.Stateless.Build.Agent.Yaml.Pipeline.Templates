@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,3 @@ steps:
     displayName: download private signing key
     inputs:
       secureFile: "be.stateless.snk"
-  - powershell: |
-      Write-Host "##vso[task.setvariable variable=PrivateSigningKeyPath;]$(privateSigningKey.secureFilePath)"
-    displayName: udpate private signing key path

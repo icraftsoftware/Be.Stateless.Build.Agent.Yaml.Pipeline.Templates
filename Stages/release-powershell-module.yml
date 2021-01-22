@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,14 +34,16 @@ stages:
 
           - template: /Steps/download-build-artifact.yml
             parameters:
-              ArtifactName: "powershellModules"
-              DownloadPath: "$(System.ArtifactsDirectory)/powershellModules"
+              ArtifactName: "PowerShellModule"
+              DownloadPath: "$(System.ArtifactsDirectory)"
 
           # required by implicit Test-ModuleManifest upon module publication
           - template: /Steps/restore-required-powershell-modules.yml
+            parameters:
+              ModuleFolderPath: $(Build.SourcesDirectory)
 
           - template: /Steps/create-github-release.yml
 
-          - template: /Steps/publish-powershell-module.yml
+          - template: /Steps/push-powershell-modules-on-powershell-gallery.yml
             parameters:
-              ModulePath: "$(System.ArtifactsDirectory)/powershellModules"
+              RootModulesFolderPath: "$(System.ArtifactsDirectory)/PowerShellModule"

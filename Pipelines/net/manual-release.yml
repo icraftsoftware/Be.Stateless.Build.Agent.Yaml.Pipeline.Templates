@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,12 +38,6 @@ parameters:
       - dotnet
       - vstest
     default: dotnet
-  - name: SkipNuGetPackaging
-    type: boolean
-    default: false
-  - name: ProjectsToPublishAsPowerShellModuleArtifact
-    type: object
-    default: []
 
 stages:
   - template: /Stages/build-dotnet.yml
@@ -55,11 +49,6 @@ stages:
       BuildEngine: ${{ parameters.BuildEngine }}
       SkipTest: ${{ parameters.SkipTest }}
       TestEngine: ${{ parameters.TestEngine }}
-      SkipBuildArtifactPackagingAndPublication: false
-      SkipNuGetPackaging: ${{ parameters.SkipNuGetPackaging }}
-      ProjectsToPublishAsPowerShellModuleArtifact: ${{ parameters.ProjectsToPublishAsPowerShellModuleArtifact }}
+      SkipBuildArtifactPublication: false
 
   - template: /Stages/release-dotnet.yml
-    parameters:
-      PublishNuGetPackages: ${{ not(parameters.SkipNuGetPackaging) }}
-      PublishPowerShellModules: ${{ gt(length(parameters.ProjectsToPublishAsPowerShellModuleArtifact), 0) }}

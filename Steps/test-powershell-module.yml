@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,21 +16,25 @@
 
 #endregion
 
+parameters:
+  - name: ModuleFolderPath
+    type: string
+
 steps:
   - task: Pester@10
     displayName: "test PowerShell module with Pester"
     inputs:
-      scriptFolder: '$(build.sourcesdirectory)'
-      resultsFile: "$(build.sourcesdirectory)/powershell-module.tests.xml"
-      CodeCoverageOutputFile: '$(build.sourcesdirectory)\coverage.powershell-module.xml'
-      CodeCoverageFolder: '$(build.sourcesdirectory)'
+      scriptFolder: '${{ parameters.ModuleFolderPath }}'
+      resultsFile: "${{ parameters.ModuleFolderPath }}/powershell-module.tests.xml"
+      CodeCoverageOutputFile: '${{ parameters.ModuleFolderPath }}\coverage.powershell-module.xml'
+      CodeCoverageFolder: '${{ parameters.ModuleFolderPath }}'
       usePSCore: False
     continueOnError: true
   - task: PublishTestResults@2
     displayName: "publish test results"
     inputs:
       testResultsFormat: "NUnit"
-      testResultsFiles: "$(build.sourcesdirectory)/powershell-module.tests.xml"
+      testResultsFiles: "${{ parameters.ModuleFolderPath }}/powershell-module.tests.xml"
       mergeTestResults: true
       failTaskOnFailedTests: true
       testRunTitle: "PowerShell Module Tests"
@@ -38,6 +42,6 @@ steps:
     displayName: "publish code coverage"
     inputs:
       codeCoverageTool: "JaCoCo"
-      summaryFileLocation: '$(build.sourcesdirectory)\coverage.powershell-module.xml'
-      pathToSources: '$(build.sourcesdirectory)'
+      summaryFileLocation: '${{ parameters.ModuleFolderPath }}\coverage.powershell-module.xml'
+      pathToSources: '${{ parameters.ModuleFolderPath }}'
       failIfCoverageEmpty: false
