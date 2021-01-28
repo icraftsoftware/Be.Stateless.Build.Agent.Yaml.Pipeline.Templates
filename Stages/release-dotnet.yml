@@ -27,6 +27,8 @@ stages:
       - job: publish
         pool:
           vmImage: "windows-latest"
+          workspace:
+            clean: all
         displayName: "Create github release, publish package on nuget.org and publish pwsh modules on PowerShell Gallery"
         steps:
           - checkout: self
@@ -35,7 +37,7 @@ stages:
           - template: /Steps/download-all-build-artifacts.yml
             parameters:
               DownloadPath: "$(System.ArtifactsDirectory)"
-              ArtifacPattern: "@(PowerShellModules|NugetPackages)"
+              ArtifactPattern: "@(PowerShellModules|NugetPackages)"
 
           - template: /Steps/create-github-release.yml
 

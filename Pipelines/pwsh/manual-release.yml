@@ -30,6 +30,6 @@ stages:
       Major: ${{ parameters.Major }}
       Minor: ${{ parameters.Minor }}
       SkipTest: ${{ parameters.SkipTest }}
-      SkipBuildArtifactPackagingAndPublication: false
+      SkipBuildArtifactPublication: false
 
   - template: /Stages/release-powershell-module.yml

@@ -19,7 +19,7 @@
 parameters:
   - name: DownloadPath
     type: string
-  - name: ArtifacPattern
+  - name: ArtifactPattern
     type: string
 
 steps:
@@ -28,6 +28,6 @@ steps:
     inputs:
       buildType: "current"
       downloadType: "specific"
-      ${{ if ne( parameters.ArtifacPattern, '' )}}:
-        itemPattern: ${{ parameters.ArtifacPattern}}/**/*
+      ${{ if ne( parameters.ArtifactPattern, '' )}}:
+        itemPattern: ${{ parameters.ArtifactPattern}}/**/*
       downloadPath: ${{ parameters.DownloadPath }}

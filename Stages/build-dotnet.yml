@@ -77,6 +77,8 @@ stages:
             submodules: true
 
           - template: /Steps/download-private-signing-key.yml
+            parameters:
+              StepName: privateSigningKey
 
           - template: /Steps/dotnet-restore.yml
             parameters:
@@ -100,7 +102,7 @@ stages:
                   Minor: ${{ parameters.Minor }}
                   PrivateSigningKeyPath: $(privateSigningKey.secureFilePath)"
 
-          - ${{ if eq(parameters.SkipTest, false) }}:
+          - ${{ if ne(parameters.SkipTest, true) }}:
               - ${{ if eq(parameters.TestEngine, 'dotnet') }}:
                   - template: /Steps/dotnet-test.yml
                     parameters:
@@ -115,7 +117,7 @@ stages:
                       ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
                       Configuration: ${{ parameters.Configuration }}
 
-          - ${{ if eq(parameters.SkipBuildArtifactPublication, false) }}:
+          - ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}:
               - template: /Steps/dotnet-pack.yml
                 parameters:
                   Configuration: ${{ parameters.Configuration }}
@@ -133,6 +135,8 @@ stages:
                   OutputPath: "$(Agent.TempDirectory)/powershell-modules"
 
               - template: /Steps/download-private-code-signing-certificate.yml
+                parameters:
+                  StepName: codeSigningCertificate
 
               - template: /Steps/build-powershell-modules.yml
                 parameters:
@@ -152,6 +156,8 @@ stages:
         condition: succeeded()
         pool:
           vmImage: "windows-latest"
+          workspace:
+            clean: all
         steps:
           - checkout: self
             submodules: true

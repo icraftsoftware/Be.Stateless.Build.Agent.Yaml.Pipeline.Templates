@@ -27,6 +27,8 @@ stages:
       - job: publish
         pool:
           vmImage: "windows-latest"
+          workspace:
+            clean: all
         displayName: "Create github release and publish PowerShell module on PowerShell Gallery"
         steps:
           - checkout: self

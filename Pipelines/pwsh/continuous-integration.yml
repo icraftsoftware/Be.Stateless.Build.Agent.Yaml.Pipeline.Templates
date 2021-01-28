@@ -30,4 +30,4 @@ stages:
       Major: ${{ parameters.Major }}
       Minor: ${{ parameters.Minor }}
       SkipTest: ${{ parameters.SkipTest }}
-      SkipBuildArtifactPackagingAndPublication: true
+      SkipBuildArtifactPublication: true

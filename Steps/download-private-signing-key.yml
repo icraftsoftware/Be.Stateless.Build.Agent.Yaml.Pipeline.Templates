@@ -16,9 +16,13 @@
 
 #endregion
 
+parameters:
+  - name: StepName
+    type: string
+
 steps:
   - task: DownloadSecureFile@1
-    name: privateSigningKey
+    name: ${{ parameters.StepName }}
     displayName: download private signing key
     inputs:
       secureFile: "be.stateless.snk"
