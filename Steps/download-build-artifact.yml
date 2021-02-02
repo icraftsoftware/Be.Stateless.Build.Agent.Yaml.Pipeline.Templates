@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,10 +21,15 @@ parameters:
     type: string
   - name: DownloadPath
     type: string
+  - name: Condition
+    type: string
+    default: ''
 
 steps:
   - task: DownloadBuildArtifacts@0
-    displayName: download nuget build artifact
+    displayName: download build artifact '${{ parameters.ArtifactName }}'
+    ${{ if ne( parameters.Condition, '' ) }}:
+      condition: ${{ parameters.Condition }}
     inputs:
       buildType: "current"
       downloadType: "single"

@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 #endregion
 
+parameters:
+  - name: StepName
+    type: string
+
 steps:
   - task: DownloadSecureFile@1
-    name: codeSigningCertificate
+    name: ${{ parameters.StepName }}
     displayName: download code signing certificate
     inputs:
       secureFile: "be.stateless.pfx"
-  - powershell: |
-      Write-Host "##vso[task.setvariable variable=CodeSigningCertificatePath;]$(codeSigningCertificate.secureFilePath)"
-    displayName: udpate code signing certificate path
