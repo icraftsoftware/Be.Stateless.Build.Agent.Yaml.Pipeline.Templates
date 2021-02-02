@@ -19,14 +19,10 @@
 parameters:
   - name: Path
     type: string
-  - name: Condition
-    type: string
 
 steps:
   - task: NuGetCommand@2
     displayName: nuget push
-    ${{ if ne( parameters.Condition, '' ) }}:
-      condition: ${{ parameters.Condition }}
     inputs:
       command: "push"
       packagesToPush: "${{ parameters.Path }}/**/*.nupkg"
