@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,20 @@
 
 #endregion
 
+parameters:
+  - name: Path
+    type: string
+  - name: Condition
+    type: string
+
 steps:
   - task: NuGetCommand@2
     displayName: nuget push
+    ${{ if ne( parameters.Condition, '' ) }}:
+      condition: ${{ parameters.Condition }}
     inputs:
       command: "push"
-      packagesToPush: "$(System.ArtifactsDirectory)/**/*.nupkg"
+      packagesToPush: "${{ parameters.Path }}/**/*.nupkg"
       nuGetFeedType: "external"
       publishFeedCredentials: "nuget.org_be.stateless"
       verbosityPush: "Normal"

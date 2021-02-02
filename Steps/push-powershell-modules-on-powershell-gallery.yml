@@ -15,14 +15,16 @@
 # limitations under the License.
 
 #endregion
-
 parameters:
-  - name: ModuleFolderPath
+  - name: RootModulesFolderPath
     type: string
 
 steps:
-  - task: PowerShell@2
-    inputs:
-      filePath: '$(Build.SourcesDirectory)\.build\pwsh\restore.ps1'
-      arguments: '-Path "${{ parameters.ModuleFolderPath }}"'
-    displayName: restore required PowerShell modules
+  - powershell: |
+      $modules = Get-ChildItem -Path ${{ parameters.ModulesPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
+      $modules | ForEach-Object -Process {
+        Write-Information "Publish PowerShell module '$_'" -InformationAction Continue
+        $(Build.SourcesDirectory)\.build\pwsh\push.ps1 -Path $_.FullName -NuGetApiKey $(powershell-gallery-api-key)
+      }
+    displayName: publish powershell modules
+    name: publishPowerShellModules

@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ steps:
   - task: GitHubRelease@1
     displayName: create github release
     inputs:
-      gitHubConnection: "github.com_icraftsoftware"
+      gitHubConnection: "emmanuelbenitez"
       repositoryName: "$(Build.Repository.Name)"
       action: "create"
       target: "$(Build.SourceVersion)"

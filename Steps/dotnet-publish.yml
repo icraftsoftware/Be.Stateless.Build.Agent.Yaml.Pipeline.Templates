@@ -17,12 +17,24 @@
 #endregion
 
 parameters:
-  - name: ModuleFolderPath
+  - name: ProjectsFilePathPattern
+    type: string
+  - name: Configuration
+    type: string
+    values:
+      - Debug
+      - Release
+  - name: OutputPath
     type: string
 
 steps:
-  - task: PowerShell@2
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet publish (${{ parameters.Configuration }})'
     inputs:
-      filePath: '$(Build.SourcesDirectory)\.build\pwsh\restore.ps1'
-      arguments: '-Path "${{ parameters.ModuleFolderPath }}"'
-    displayName: restore required PowerShell modules
+      command: publish
+      projects: "${{ parameters.ProjectsFilePathPattern }}"
+      configuration: "${{ parameters.Configuration }}"
+      arguments: "--configuration ${{ parameters.Configuration }} --output ${{ parameters.OutputPath }} --no-build"
+      publishWebProjects: false
+      zipAfterPublish: false
+      modifyOutputPath: true

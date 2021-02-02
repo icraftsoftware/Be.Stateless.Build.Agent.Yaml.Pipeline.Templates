@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ parameters:
     values:
       - Debug
       - Release
+  - name: PrivateSigningKeyPath
+    type: string
 
 steps:
   - task: DotNetCoreCLI@2
@@ -35,4 +37,4 @@ steps:
     inputs:
       command: "build"
       projects: "${{ parameters.ProjectOrSolutionPath }}"
-      arguments: "-p:Configuration=${{ parameters.Configuration }};Major=${{ parameters.Major }};Minor=${{ parameters.Minor }};Build=$(VersionBuild);Revision=$(VersionRevision);AssemblyOriginatorKeyFile=$(PrivateSigningKeyPath);GeneratePackageOnBuild=false;NoWarn=1591 --no-restore"
+      arguments: "-p:Configuration=${{ parameters.Configuration }};Major=${{ parameters.Major }};Minor=${{ parameters.Minor }};Build=$(VersionBuild);Revision=$(VersionRevision);AssemblyOriginatorKeyFile=${{ parameters.PrivateSigningKeyPath }};GeneratePackageOnBuild=false;NoWarn=1591 --no-restore"

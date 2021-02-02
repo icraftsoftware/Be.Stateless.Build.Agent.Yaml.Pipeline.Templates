@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ parameters:
     type: number
   - name: SkipTest
     type: boolean
-  - name: SkipBuildArtifactPackagingAndPublication
+  - name: SkipBuildArtifactPublication
     type: boolean
 
 stages:
@@ -37,6 +37,8 @@ stages:
       - job: build
         pool:
           vmImage: "windows-latest"
+          workspace:
+            clean: all
         displayName: "Build, test and sign PowerShell module"
         steps:
           - checkout: self
@@ -47,14 +49,28 @@ stages:
               Major: ${{ parameters.Major }}
               Minor: ${{ parameters.Minor }}
 
-          - ${{ if eq(parameters.SkipTest, false) }}:
+          - ${{ if ne(parameters.SkipTest, true) }}:
               - template: /Steps/restore-required-powershell-modules.yml
-              - template: /Steps/test-powershell-module.yml
+                parameters:
+                  ModuleFolderPath: $(Build.SourcesDirectory)
 
-          - ? ${{ if eq(parameters.SkipBuildArtifactPackagingAndPublication, false) }}
+              - template: /Steps/test-powershell-module.yml
+                parameters:
+                  ModuleFolderPath: $(Build.SourcesDirectory)
+
+          - ? ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}
             : - template: /Steps/download-private-code-signing-certificate.yml
-              - template: /Steps/build-powershell-module.yml
+                parameters:
+                  StepName: codeSigningCertificate
+
+              - template: /Steps/build-powershell-modules.yml
+                parameters:
+                  RootModulesFolderPath: "$(Build.SourcesDirectory)/.."
+                  OutputPath: "$(Build.ArtifactStagingDirectory)"
+                  CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
+                  CodeSigningCertificatePassword: $(be-stateless-certificate-password)
+
               - template: /Steps/publish-build-artifact.yml
                 parameters:
-                  ArtifactName: "powershellModule"
+                  ArtifactName: "PowerShellModule"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)"

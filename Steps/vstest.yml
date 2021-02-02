@@ -1,4 +1,4 @@
-#region Copyright & License
+﻿#region Copyright & License
 
 # Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
@@ -17,12 +17,27 @@
 #endregion
 
 parameters:
-  - name: ModuleFolderPath
+  - name: Configuration
     type: string
+    values:
+      - Debug
+      - Release
 
 steps:
-  - task: PowerShell@2
+  - task: VSTest@2
+    displayName: VSTest (${{ parameters.Configuration }})
     inputs:
-      filePath: '$(Build.SourcesDirectory)\.build\pwsh\restore.ps1'
-      arguments: '-Path "${{ parameters.ModuleFolderPath }}"'
-    displayName: restore required PowerShell modules
+      testSelector: "testAssemblies"
+      testAssemblyVer2: |
+        **\*.Tests.dll
+        !**\*TestAdapter.dll
+        !**\obj\**
+      searchFolder: "$(build.sourcesdirectory)"
+  #TODO use corvelet
+  - task: PublishTestResults@2
+    displayName: Publish test results (${{ parameters.Configuration }})
+    inputs:
+      testResultsFormat: "XUnit"
+      testResultsFiles: "**/TEST-*.xml"
+      mergeTestResults: true
+

@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ parameters:
     type: number
   - name: Minor
     type: number
-  - name: SkipTest
-    type: boolean
-    default: false
   - name: BuildEngine
     type: string
     values:
       - dotnet
       - msbuild
     default: dotnet
+  - name: SkipTest
+    type: boolean
+    default: false
   - name: TestEngine
     type: string
     values:
@@ -40,15 +40,15 @@ parameters:
     default: dotnet
 
 stages:
-  - template: /Stages/build-dotnet-nuget.yml
+  - template: /Stages/build-dotnet.yml
     parameters:
       ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
       Major: ${{ parameters.Major }}
       Minor: ${{ parameters.Minor }}
       Configuration: Release
-      SkipTest: ${{ parameters.SkipTest }}
-      SkipBuildArtifactPackagingAndPublication: false
       BuildEngine: ${{ parameters.BuildEngine }}
+      SkipTest: ${{ parameters.SkipTest }}
       TestEngine: ${{ parameters.TestEngine }}
+      SkipBuildArtifactPublication: false
 
-  - template: /Stages/release-nuget.yml
+  - template: /Stages/release-dotnet.yml
