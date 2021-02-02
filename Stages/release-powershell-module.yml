@@ -49,3 +49,4 @@ stages:
           - template: /Steps/push-powershell-modules-on-powershell-gallery.yml
             parameters:
               RootModulesFolderPath: "$(System.ArtifactsDirectory)/PowerShellModule"
+              PowerShellGalleryApiKey: $(powershell-gallery-api-key)
