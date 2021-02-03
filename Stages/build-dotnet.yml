@@ -44,6 +44,8 @@ parameters:
     default: dotnet
   - name: SkipBuildArtifactPublication
     type: boolean
+  - name: SkipPowerShellModules
+    type: boolean
 
 stages:
   - stage: build
@@ -128,27 +130,28 @@ stages:
                   ArtifactName: "NugetPackages"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
 
-              - template: /Steps/dotnet-publish.yml
-                parameters:
-                  ProjectsFilePathPattern: "$(Build.SourcesDirectory)/**/*.Cmdlets.csproj"
-                  Configuration: ${{ parameters.Configuration }}
-                  OutputPath: "$(Agent.TempDirectory)/powershell-modules"
+              - ${{ if ne(parameters.SkipPowerShellModules, true) }}:
+                  - template: /Steps/dotnet-publish.yml
+                    parameters:
+                      ProjectsFilePathPattern: "$(Build.SourcesDirectory)/**/*.Cmdlets.csproj"
+                      Configuration: ${{ parameters.Configuration }}
+                      OutputPath: "$(Agent.TempDirectory)/powershell-modules"
 
-              - template: /Steps/download-private-code-signing-certificate.yml
-                parameters:
-                  StepName: codeSigningCertificate
+                  - template: /Steps/download-private-code-signing-certificate.yml
+                    parameters:
+                      StepName: codeSigningCertificate
 
-              - template: /Steps/build-powershell-modules.yml
-                parameters:
-                  RootModulesFolderPath: "$(Agent.TempDirectory)/powershell-modules"
-                  OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
-                  CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
-                  CodeSigningCertificatePassword: $(be-stateless-certificate-password)
+                  - template: /Steps/build-powershell-modules.yml
+                    parameters:
+                      RootModulesFolderPath: "$(Agent.TempDirectory)/powershell-modules"
+                      OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
+                      CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
+                      CodeSigningCertificatePassword: $(be-stateless-certificate-password)
 
-              - template: /Steps/publish-build-artifact.yml
-                parameters:
-                  ArtifactName: "PowerShellModules"
-                  PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
+                  - template: /Steps/publish-build-artifact.yml
+                    parameters:
+                      ArtifactName: "PowerShellModules"
+                      PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
 
       - job: analyzeCode
         displayName: "Analyze code"

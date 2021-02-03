@@ -23,10 +23,12 @@ parameters:
 
 steps:
   - powershell: |
-      $modules = Get-ChildItem -Path ${{ parameters.RootModulesFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
-      $modules | ForEach-Object -Process {
-        Write-Information "Publish PowerShell module '$_'" -InformationAction Continue
-        $(Build.SourcesDirectory)\.build\pwsh\push.ps1 -Path $_.FullName -NuGetApiKey ${{ parameters.PowerShellGalleryApiKey }}
+      if(Test-Path -Path ${{ parameters.RootModulesFolderPath }} -PathType Container){
+        $modules = Get-ChildItem -Path ${{ parameters.RootModulesFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
+        $modules | ForEach-Object -Process {
+          Write-Information "Publish PowerShell module '$_'" -InformationAction Continue
+          $(Build.SourcesDirectory)\.build\pwsh\push.ps1 -Path $_.FullName -NuGetApiKey ${{ parameters.PowerShellGalleryApiKey }}
+        }
       }
     displayName: publish powershell modules
     name: publishPowerShellModules

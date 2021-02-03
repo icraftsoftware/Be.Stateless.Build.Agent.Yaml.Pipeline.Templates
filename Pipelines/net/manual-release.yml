@@ -38,6 +38,9 @@ parameters:
       - dotnet
       - vstest
     default: dotnet
+  - name: SkipPowerShellModules
+    type: boolean
+    default: true
 
 stages:
   - template: /Stages/build-dotnet.yml
@@ -50,5 +53,6 @@ stages:
       SkipTest: ${{ parameters.SkipTest }}
       TestEngine: ${{ parameters.TestEngine }}
       SkipBuildArtifactPublication: false
+      SkipPowerShellModules: ${{ parameters.SkipPowerShellModules }}
 
   - template: /Stages/release-dotnet.yml

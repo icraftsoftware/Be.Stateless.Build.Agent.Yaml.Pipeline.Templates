@@ -50,6 +50,4 @@ stages:
       SkipTest: ${{ parameters.SkipTest }}
       TestEngine: ${{ parameters.TestEngine }}
       SkipBuildArtifactPublication: true
-
-
-
+      SkipPowerShellModules: true
