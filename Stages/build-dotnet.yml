@@ -1,6 +1,6 @@
 #region Copyright & License
 
-# Copyright © 2012 - 2020 François Chabot
+# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,26 +28,30 @@ parameters:
     values:
       - Debug
       - Release
-  - name: SkipTest
-    type: boolean
-  - name: SkipBuildArtifactPackagingAndPublication
-    type: boolean
   - name: BuildEngine
     type: string
     values:
       - dotnet
       - msbuild
     default: dotnet
+  - name: SkipTest
+    type: boolean
   - name: TestEngine
     type: string
     values:
       - dotnet
       - vstest
     default: dotnet
+  - name: SkipBuildArtifactPublication
+    type: boolean
+  - name: SkipPowerShellModules
+    type: boolean
 
 stages:
   - stage: build
     displayName: "Build stage"
+    variables:
+      - group: "code-signing-certificates"
     jobs:
       - job: prepare
         displayName: "Prepare"
@@ -63,17 +67,20 @@ stages:
         displayName: "Compile, test, and pack"
         pool:
           vmImage: "windows-latest"
+          workspace:
+            clean: all
         dependsOn: prepare
         condition: succeeded()
         variables:
           VersionBuild: $[ dependencies.prepare.outputs['generateBuildNumber.VersionBuild'] ]
           VersionRevision: $[ dependencies.prepare.outputs['generateBuildNumber.VersionRevision'] ]
-          PrivateSigningKeyPath: ""
         steps:
           - checkout: self
             submodules: true
 
           - template: /Steps/download-private-signing-key.yml
+            parameters:
+              StepName: privateSigningKey
 
           - template: /Steps/dotnet-restore.yml
             parameters:
@@ -86,6 +93,7 @@ stages:
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
+                  PrivateSigningKeyPath: "$(privateSigningKey.secureFilePath)"
 
           - ${{ if eq(parameters.BuildEngine, 'msbuild') }}:
               - template: /Steps/msbuild-build.yml
@@ -94,29 +102,55 @@ stages:
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
+                  PrivateSigningKeyPath: "$(privateSigningKey.secureFilePath)"
 
-          - ${{ if eq(parameters.SkipTest, false) }}:
+          - ${{ if ne(parameters.SkipTest, true) }}:
               - ${{ if eq(parameters.TestEngine, 'dotnet') }}:
                   - template: /Steps/dotnet-test.yml
                     parameters:
                       ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
                       Configuration: ${{ parameters.Configuration }}
+
                   - template: /Steps/generate-and-publish-code-coverage-report.yml
+
               - ${{ if eq(parameters.TestEngine, 'vstest') }}:
-                  - template: /Steps/dotnet-vstest.yml
+                  - template: /Steps/vstest.yml
                     parameters:
-                      ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
                       Configuration: ${{ parameters.Configuration }}
 
-          - ? ${{ if eq(parameters.SkipBuildArtifactPackagingAndPublication, false) }}
-            : - template: /Steps/dotnet-pack.yml
+          - ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}:
+              - template: /Steps/dotnet-pack.yml
                 parameters:
                   Configuration: ${{ parameters.Configuration }}
+                  OutputPath: "$(build.artifactstagingdirectory)/packages"
 
               - template: /Steps/publish-build-artifact.yml
                 parameters:
-                  ArtifactName: "nugetPackage"
+                  ArtifactName: "NugetPackages"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
+
+              - ${{ if ne(parameters.SkipPowerShellModules, true) }}:
+                  - template: /Steps/dotnet-publish.yml
+                    parameters:
+                      ProjectsFilePathPattern: "$(Build.SourcesDirectory)/**/*.Cmdlets.csproj"
+                      Configuration: ${{ parameters.Configuration }}
+                      OutputPath: "$(Agent.TempDirectory)/powershell-modules"
+
+                  - template: /Steps/download-private-code-signing-certificate.yml
+                    parameters:
+                      StepName: codeSigningCertificate
+
+                  - template: /Steps/build-powershell-modules.yml
+                    parameters:
+                      RootModulesFolderPath: "$(Agent.TempDirectory)/powershell-modules"
+                      OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
+                      CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
+                      CodeSigningCertificatePassword: $(be-stateless-certificate-password)
+
+                  - template: /Steps/publish-build-artifact.yml
+                    parameters:
+                      ArtifactName: "PowerShellModules"
+                      PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
 
       - job: analyzeCode
         displayName: "Analyze code"
@@ -124,6 +158,8 @@ stages:
         condition: succeeded()
         pool:
           vmImage: "windows-latest"
+          workspace:
+            clean: all
         steps:
           - checkout: self
             submodules: true
