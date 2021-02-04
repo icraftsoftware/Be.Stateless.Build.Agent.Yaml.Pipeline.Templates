@@ -116,7 +116,6 @@ stages:
               - ${{ if eq(parameters.TestEngine, 'vstest') }}:
                   - template: /Steps/vstest.yml
                     parameters:
-                      ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
                       Configuration: ${{ parameters.Configuration }}
 
           - ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}:
