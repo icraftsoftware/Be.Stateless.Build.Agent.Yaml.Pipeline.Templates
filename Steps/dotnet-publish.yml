@@ -26,10 +26,17 @@ parameters:
       - Release
   - name: OutputPath
     type: string
+  - name: FlattenOutput
+    type: boolean
+  - name: Condition
+    type: string
+    default: ''
 
 steps:
   - task: DotNetCoreCLI@2
     displayName: 'dotnet publish (${{ parameters.Configuration }})'
+    ${{ if ne( parameters.Condition, '' )}}:
+      condition: ${{ parameters.Condition }}
     inputs:
       command: publish
       projects: "${{ parameters.ProjectsFilePathPattern }}"
@@ -37,4 +44,4 @@ steps:
       arguments: "--configuration ${{ parameters.Configuration }} --output ${{ parameters.OutputPath }} --no-build"
       publishWebProjects: false
       zipAfterPublish: false
-      modifyOutputPath: true
+      modifyOutputPath: ${{ not(parameters.FlattenOutput) }}
