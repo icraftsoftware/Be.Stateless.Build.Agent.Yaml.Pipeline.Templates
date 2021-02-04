@@ -93,7 +93,7 @@ stages:
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
-                  PrivateSigningKeyPath: $(privateSigningKey.secureFilePath)"
+                  PrivateSigningKeyPath: "$(privateSigningKey.secureFilePath)"
 
           - ${{ if eq(parameters.BuildEngine, 'msbuild') }}:
               - template: /Steps/msbuild-build.yml
@@ -102,7 +102,7 @@ stages:
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
-                  PrivateSigningKeyPath: $(privateSigningKey.secureFilePath)"
+                  PrivateSigningKeyPath: "$(privateSigningKey.secureFilePath)"
 
           - ${{ if ne(parameters.SkipTest, true) }}:
               - ${{ if eq(parameters.TestEngine, 'dotnet') }}:
