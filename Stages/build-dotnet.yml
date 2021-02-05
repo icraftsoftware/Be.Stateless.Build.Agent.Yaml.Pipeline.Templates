@@ -102,6 +102,8 @@ stages:
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
+                  Build: $(VersionBuild)
+                  Revision: $(VersionRevision)
                   PrivateSigningKeyPath: "$(privateSigningKey.secureFilePath)"
 
           - ${{ if ne(parameters.SkipTest, true) }}:
@@ -135,6 +137,7 @@ stages:
                       ProjectsFilePathPattern: "$(Build.SourcesDirectory)/**/*.Cmdlets.csproj"
                       Configuration: ${{ parameters.Configuration }}
                       OutputPath: "$(Agent.TempDirectory)/powershell-modules"
+                      FlattenOutput: false
 
                   - template: /Steps/download-private-code-signing-certificate.yml
                     parameters:

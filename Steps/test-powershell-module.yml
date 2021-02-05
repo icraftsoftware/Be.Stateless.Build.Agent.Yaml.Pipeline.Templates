@@ -19,14 +19,16 @@
 parameters:
   - name: ModuleFolderPath
     type: string
+  - name: ResultFolderPath
+    type: string
 
 steps:
   - task: Pester@10
     displayName: "test PowerShell module with Pester"
     inputs:
       scriptFolder: '${{ parameters.ModuleFolderPath }}'
-      resultsFile: "${{ parameters.ModuleFolderPath }}/powershell-module.tests.xml"
-      CodeCoverageOutputFile: '${{ parameters.ModuleFolderPath }}\coverage.powershell-module.xml'
+      resultsFile: "${{ parameters.ResultFolderPath }}/powershell-module.tests.xml"
+      CodeCoverageOutputFile: '${{ parameters.ResultFolderPath }}\coverage.powershell-module.xml'
       CodeCoverageFolder: '${{ parameters.ModuleFolderPath }}'
       usePSCore: False
     continueOnError: true
@@ -34,7 +36,7 @@ steps:
     displayName: "publish test results"
     inputs:
       testResultsFormat: "NUnit"
-      testResultsFiles: "${{ parameters.ModuleFolderPath }}/powershell-module.tests.xml"
+      testResultsFiles: "${{ parameters.ResultFolderPath }}/powershell-module.tests.xml"
       mergeTestResults: true
       failTaskOnFailedTests: true
       testRunTitle: "PowerShell Module Tests"
@@ -42,6 +44,6 @@ steps:
     displayName: "publish code coverage"
     inputs:
       codeCoverageTool: "JaCoCo"
-      summaryFileLocation: '${{ parameters.ModuleFolderPath }}\coverage.powershell-module.xml'
+      summaryFileLocation: '${{ parameters.ResultFolderPath }}\coverage.powershell-module.xml'
       pathToSources: '${{ parameters.ModuleFolderPath }}'
       failIfCoverageEmpty: false

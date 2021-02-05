@@ -23,6 +23,10 @@ parameters:
     type: number
   - name: Minor
     type: number
+  - name: Build
+    type: string
+  - name: Revision
+    type: string
   - name: Configuration
     type: string
     values:
@@ -30,11 +34,16 @@ parameters:
       - Release
   - name: PrivateSigningKeyPath
     type: string
+  - name: Condition
+    type: string
+    default: ''
 
 steps:
   - task: DotNetCoreCLI@2
     displayName: dotnet build (${{ parameters.Configuration }})
+    ${{ if ne( parameters.Condition, '' )}}:
+      condition: ${{ parameters.Condition }}
     inputs:
       command: "build"
       projects: "${{ parameters.ProjectOrSolutionPath }}"
-      arguments: "-p:Configuration=${{ parameters.Configuration }};Major=${{ parameters.Major }};Minor=${{ parameters.Minor }};Build=$(VersionBuild);Revision=$(VersionRevision);AssemblyOriginatorKeyFile=${{ parameters.PrivateSigningKeyPath }};GeneratePackageOnBuild=false;NoWarn=1591 --no-restore"
+      arguments: "-p:Configuration=${{ parameters.Configuration }};Major=${{ parameters.Major }};Minor=${{ parameters.Minor }};Build=${{ parameters.Build }};Revision=${{ parameters.Revision }};AssemblyOriginatorKeyFile=${{ parameters.PrivateSigningKeyPath }};GeneratePackageOnBuild=false;NoWarn=1591 --no-restore"
