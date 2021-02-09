@@ -93,6 +93,8 @@ stages:
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
+                  Build: $(VersionBuild)
+                  Revision: $(VersionRevision)
                   PrivateSigningKeyPath: "$(privateSigningKey.secureFilePath)"
 
           - ${{ if eq(parameters.BuildEngine, 'msbuild') }}:
