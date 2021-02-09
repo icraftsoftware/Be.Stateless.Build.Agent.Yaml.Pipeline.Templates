@@ -19,18 +19,18 @@
 parameters:
   - name: SearchFolderPath
     type: string
-  - name: ProjectFilePattern
+  - name: FilePattern
     type: string
   - name: StepName
     type: string
 
 steps:
   - powershell: |
-      $projectFiles = Get-ChildItem -Path ${{ parameters.SearchFolderPath }} -Filter ${{ parameters.ProjectFilePattern }} -Recurse
-      $existProjectFiles = $null -ne $projectFiles
-      $projectFilePaths = $(($projectFiles | Select-Object -ExpandProperty FullName) -join ';')
-      Write-Host "##vso[task.setvariable variable=exists;isOutput=true]$existProjectFiles"
-      Write-Host "##vso[task.setvariable variable=projectFilePaths;isOutput=true]$projectFilePaths"
-      Write-Host "Found project files: $projectFilePaths"
-    displayName: Find project file mathcing '${{ parameters.ProjectFilePattern }}'
+      $files = @(Get-ChildItem -Path ${{ parameters.SearchFolderPath }} -Filter ${{ parameters.FilePattern }} -Recurse)
+      $filesExist = $null -ne $files
+      $filePaths = $files.FullName -join ';'
+      Write-Host "Found files: $filePaths"
+      Write-Host "##vso[task.setvariable variable=exists;isOutput=true]$filesExist"
+      Write-Host "##vso[task.setvariable variable=filePaths;isOutput=true]$filePaths"
+    displayName: Find file mathcing '${{ parameters.FilePattern }}'
     name: ${{ parameters.StepName }}

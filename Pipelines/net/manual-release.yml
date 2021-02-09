@@ -20,6 +20,7 @@ parameters:
   # TODO - To be remove
   - name: ProjectOrSolutionPath
     type: string
+    default: ''
   - name: Major
     type: number
   - name: Minor

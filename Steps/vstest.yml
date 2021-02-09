@@ -35,4 +35,4 @@ steps:
         !**\*TestAdapter.dll
         !**\obj\**
       searchFolder: ${{ parameters.SearchTestAssemblyFolderPath }}
-  #TODO use corvelet
+  #TODO use Coverlet

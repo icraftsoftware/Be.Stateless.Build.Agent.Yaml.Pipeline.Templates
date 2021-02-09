@@ -137,7 +137,7 @@ stages:
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
 
               # Binary PowerShell Modules
-              - template: /Steps/find-project-files-path.yml
+              - template: /Steps/find-file-paths.yml
                 parameters:
                   SearchFolderPath: "$(Build.SourcesDirectory)/src"
                   ProjectFilePattern: "*.Cmdlets.csproj"
@@ -145,7 +145,7 @@ stages:
 
               - template: /Steps/dotnet-publish.yml
                 parameters:
-                  ProjectsFilePathPattern: "$(findBinaryPowerShellModule.projectFilePaths)"
+                  ProjectsFilePathPattern: "$(findBinaryPowerShellModule.filePaths)"
                   Configuration: ${{ parameters.Configuration }}
                   OutputPath: "$(Agent.TempDirectory)/powershell-modules"
                   FlattenOutput: false
@@ -168,7 +168,7 @@ stages:
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
 
               # BizTalk Deployment Packages
-              - template: /Steps/find-project-files-path.yml
+              - template: /Steps/find-file-paths.yml
                 parameters:
                   SearchFolderPath: "$(Build.SourcesDirectory)/src"
                   ProjectFilePattern: "*.Deployment.csproj"
