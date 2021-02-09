@@ -24,10 +24,15 @@ parameters:
     values:
       - Debug
       - Release
+  - name: Condition
+    type: string
+    default: ''
 
 steps:
   - task: DotNetCoreCLI@2
     displayName: dotnet test (${{ parameters.Configuration }})
+    ${{ if ne( parameters.Condition, '' )}}:
+      condition: ${{ parameters.Condition }}
     inputs:
       command: test
       projects: "${{ parameters.ProjectOrSolutionPath }}"

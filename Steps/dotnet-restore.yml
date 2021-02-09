@@ -19,10 +19,15 @@
 parameters:
   - name: ProjectOrSolutionPath
     type: string
+  - name: Condition
+    type: string
+    default: ''
 
 steps:
   - task: DotNetCoreCLI@2
     displayName: dotnet restore
+    ${{ if ne( parameters.Condition, '' )}}:
+      condition: ${{ parameters.Condition }}
     inputs:
       command: "restore"
       projects: "${{ parameters.ProjectOrSolutionPath }}"

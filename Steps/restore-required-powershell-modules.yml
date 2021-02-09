@@ -17,12 +17,17 @@
 #endregion
 
 parameters:
-  - name: ModuleFolderPath
+  - name: RootModulesFolderPath
     type: string
 
 steps:
-  - task: PowerShell@2
-    inputs:
-      filePath: '$(Build.SourcesDirectory)\.build\pwsh\restore.ps1'
-      arguments: '-Path "${{ parameters.ModuleFolderPath }}"'
+  - powershell: |
+      if(Test-Path -Path ${{ parameters.RootModulesFolderPath }} -PathType Container){
+        $modules = Get-ChildItem -Path ${{ parameters.RootModulesFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
+        $modules | ForEach-Object -Process {
+          Write-Information "Restore required modules for PowerShell module '$_'" -InformationAction Continue
+          $(Build.SourcesDirectory)\.build\pwsh\restore.ps1 -Path $_.FullName
+        }
+      }
     displayName: restore required PowerShell modules
+    name: restoreRequiredPowerShellModules

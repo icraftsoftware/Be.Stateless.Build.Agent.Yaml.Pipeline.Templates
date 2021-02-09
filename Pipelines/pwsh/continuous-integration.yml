@@ -27,6 +27,7 @@ parameters:
 stages:
   - template: /Stages/build-powershell-module.yml
     parameters:
+      Configuration: Debug
       Major: ${{ parameters.Major }}
       Minor: ${{ parameters.Minor }}
       SkipTest: ${{ parameters.SkipTest }}
