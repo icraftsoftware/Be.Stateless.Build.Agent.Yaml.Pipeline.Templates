@@ -37,9 +37,11 @@ stages:
           - template: /Steps/download-all-build-artifacts.yml
             parameters:
               DownloadPath: "$(System.ArtifactsDirectory)"
-              ArtifactPattern: "@(PowerShellModules|NugetPackages)"
+              ArtifactPattern: "@(PowerShellModules|NugetPackages|BizTalkPackages)"
 
           - template: /Steps/create-github-release.yml
+            parameters:
+              AssetFilePattern: "$(System.ArtifactsDirectory)/BizTalkPackages/*.zip"
 
           - template: /Steps/nuget-push-to-nuget-org.yml
             parameters:
