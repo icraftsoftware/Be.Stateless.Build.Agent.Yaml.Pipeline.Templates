@@ -17,8 +17,6 @@
 #endregion
 
 parameters:
-  - name: ProjectOrSolutionPath
-    type: string
   - name: Major
     type: number
   - name: Minor
@@ -43,8 +41,6 @@ parameters:
       - vstest
     default: dotnet
   - name: SkipBuildArtifactPublication
-    type: boolean
-  - name: SkipPowerShellModules
     type: boolean
 
 stages:
@@ -78,18 +74,23 @@ stages:
           - checkout: self
             submodules: true
 
+          - template: /Steps/find-solution-file-path.yml
+            parameters:
+              SearchFolderPath: $(Build.SourcesDirectory)
+              StepName: findSolutionFile
+
           - template: /Steps/download-private-signing-key.yml
             parameters:
               StepName: privateSigningKey
 
           - template: /Steps/dotnet-restore.yml
             parameters:
-              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+              ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
 
           - ${{ if eq(parameters.BuildEngine, 'dotnet') }}:
               - template: /Steps/dotnet-build.yml
                 parameters:
-                  ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                  ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
@@ -100,7 +101,7 @@ stages:
           - ${{ if eq(parameters.BuildEngine, 'msbuild') }}:
               - template: /Steps/msbuild-build.yml
                 parameters:
-                  ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                  ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
@@ -112,7 +113,7 @@ stages:
               - ${{ if eq(parameters.TestEngine, 'dotnet') }}:
                   - template: /Steps/dotnet-test.yml
                     parameters:
-                      ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                      ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
                       Configuration: ${{ parameters.Configuration }}
 
                   - template: /Steps/generate-and-publish-code-coverage-report.yml
@@ -120,42 +121,71 @@ stages:
               - ${{ if eq(parameters.TestEngine, 'vstest') }}:
                   - template: /Steps/vstest.yml
                     parameters:
+                      SearchTestAssemblyFolderPath: "$(Build.SourcesDirectory)"
                       Configuration: ${{ parameters.Configuration }}
 
           - ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}:
+              # NuGet Packages
               - template: /Steps/dotnet-pack.yml
                 parameters:
                   Configuration: ${{ parameters.Configuration }}
-                  OutputPath: "$(build.artifactstagingdirectory)/packages"
+                  OutputPath: "$(Build.ArtifactStagingDirectory)/packages"
 
               - template: /Steps/publish-build-artifact.yml
                 parameters:
                   ArtifactName: "NugetPackages"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
 
-              - ${{ if ne(parameters.SkipPowerShellModules, true) }}:
-                  - template: /Steps/dotnet-publish.yml
-                    parameters:
-                      ProjectsFilePathPattern: "$(Build.SourcesDirectory)/**/*.Cmdlets.csproj"
-                      Configuration: ${{ parameters.Configuration }}
-                      OutputPath: "$(Agent.TempDirectory)/powershell-modules"
-                      FlattenOutput: false
+              # Binary PowerShell Modules
+              - template: /Steps/find-file-paths.yml
+                parameters:
+                  SearchFolderPath: "$(Build.SourcesDirectory)/src"
+                  ProjectFilePattern: "*.Cmdlets.csproj"
+                  StepName: findBinaryPowerShellModule
 
-                  - template: /Steps/download-private-code-signing-certificate.yml
-                    parameters:
-                      StepName: codeSigningCertificate
+              - template: /Steps/dotnet-publish.yml
+                parameters:
+                  ProjectsFilePathPattern: "$(findBinaryPowerShellModule.filePaths)"
+                  Configuration: ${{ parameters.Configuration }}
+                  OutputPath: "$(Agent.TempDirectory)/powershell-modules"
+                  FlattenOutput: false
+                  Condition: eq(variables['findBinaryPowerShellModule.exists'], 'true')
 
-                  - template: /Steps/build-powershell-modules.yml
-                    parameters:
-                      RootModulesFolderPath: "$(Agent.TempDirectory)/powershell-modules"
-                      OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
-                      CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
-                      CodeSigningCertificatePassword: $(be-stateless-certificate-password)
+              - template: /Steps/download-private-code-signing-certificate.yml
+                parameters:
+                  StepName: codeSigningCertificate
 
-                  - template: /Steps/publish-build-artifact.yml
-                    parameters:
-                      ArtifactName: "PowerShellModules"
-                      PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
+              - template: /Steps/build-powershell-modules.yml
+                parameters:
+                  RootModulesFolderPath: "$(Agent.TempDirectory)/powershell-modules"
+                  OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
+                  CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
+                  CodeSigningCertificatePassword: $(be-stateless-certificate-password)
+
+              - template: /Steps/publish-build-artifact.yml
+                parameters:
+                  ArtifactName: "PowerShellModules"
+                  PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
+
+              # BizTalk Deployment Packages
+              - template: /Steps/find-file-paths.yml
+                parameters:
+                  SearchFolderPath: "$(Build.SourcesDirectory)/src"
+                  ProjectFilePattern: "*.Deployment.csproj"
+                  StepName: findBizTalkPackageProject
+
+              - template: /Steps/create-biztalk-package.yml
+                parameters:
+                  PackageName: $(findSolutionFile.solutionName)
+                  Configuration: ${{ parameters.Configuration }}
+                  SourceProjectPath: "$(Build.SourcesDirectory)/src/$(findSolutionFile.solutionName)"
+                  OutputFolderPath: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
+                  Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
+
+              - template: /Steps/publish-build-artifact.yml
+                parameters:
+                  ArtifactName: "BizTalkPackages"
+                  PathToPublish: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
 
       - job: analyzeCode
         displayName: "Analyze code"
@@ -169,11 +199,16 @@ stages:
           - checkout: self
             submodules: true
 
+          - template: /Steps/find-solution-file-path.yml
+            parameters:
+              SearchFolderPath: $(Build.SourcesDirectory)
+              StepName: findSolutionFile
+
           - template: /Steps/dotnet-restore.yml
             parameters:
-              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+              ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
 
           - template: /Steps/analyze-code-with-resharper.yml
             parameters:
-              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+              ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
               Configuration: ${{ parameters.Configuration }}

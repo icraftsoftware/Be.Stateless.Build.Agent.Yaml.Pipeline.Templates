@@ -17,8 +17,10 @@
 #endregion
 
 parameters:
+  # TODO - To be remove
   - name: ProjectOrSolutionPath
     type: string
+    default: ''
   - name: Major
     type: number
   - name: Minor
@@ -42,7 +44,6 @@ parameters:
 stages:
   - template: /Stages/build-dotnet.yml
     parameters:
-      ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
       Major: ${{ parameters.Major }}
       Minor: ${{ parameters.Minor }}
       Configuration: Debug
@@ -50,4 +51,3 @@ stages:
       SkipTest: ${{ parameters.SkipTest }}
       TestEngine: ${{ parameters.TestEngine }}
       SkipBuildArtifactPublication: true
-      SkipPowerShellModules: true

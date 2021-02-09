@@ -1,4 +1,4 @@
-﻿#region Copyright & License
+#region Copyright & License
 
 # Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
@@ -17,22 +17,20 @@
 #endregion
 
 parameters:
-  - name: Configuration
+  - name: SearchFolderPath
     type: string
-    values:
-      - Debug
-      - Release
-  - name: SearchTestAssemblyFolderPath
+  - name: FilePattern
+    type: string
+  - name: StepName
     type: string
 
 steps:
-  - task: VSTest@2
-    displayName: VSTest (${{ parameters.Configuration }})
-    inputs:
-      testSelector: "testAssemblies"
-      testAssemblyVer2: |
-        **\*.Tests.dll
-        !**\*TestAdapter.dll
-        !**\obj\**
-      searchFolder: ${{ parameters.SearchTestAssemblyFolderPath }}
-  #TODO use Coverlet
+  - powershell: |
+      $files = @(Get-ChildItem -Path ${{ parameters.SearchFolderPath }} -Filter ${{ parameters.FilePattern }} -Recurse)
+      $filesExist = $null -ne $files
+      $filePaths = $files.FullName -join ';'
+      Write-Host "Found files: $filePaths"
+      Write-Host "##vso[task.setvariable variable=exists;isOutput=true]$filesExist"
+      Write-Host "##vso[task.setvariable variable=filePaths;isOutput=true]$filePaths"
+    displayName: Find file mathcing '${{ parameters.FilePattern }}'
+    name: ${{ parameters.StepName }}

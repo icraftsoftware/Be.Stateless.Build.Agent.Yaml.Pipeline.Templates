@@ -16,6 +16,11 @@
 
 #endregion
 
+parameters:
+  - name: AssetFilePattern
+    type: string
+    default: ''
+
 steps:
   - task: GitHubRelease@1
     displayName: create github release
@@ -29,3 +34,5 @@ steps:
       title: "$(Build.BuildNumber)"
       changeLogCompareToRelease: "lastFullRelease"
       changeLogType: "commitBased"
+      ${{ if ne( parameters.AssetFilePattern , '' ) }}:
+        assets: ${{ parameters.AssetFilePattern }}
