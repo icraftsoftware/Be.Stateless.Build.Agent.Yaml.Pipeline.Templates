@@ -22,6 +22,8 @@ parameters:
     values:
       - Debug
       - Release
+  - name: SearchTestAssemblyFolderPath
+    type: string
 
 steps:
   - task: VSTest@2
@@ -32,12 +34,5 @@ steps:
         **\*.Tests.dll
         !**\*TestAdapter.dll
         !**\obj\**
-      searchFolder: "$(build.sourcesdirectory)"
+      searchFolder: ${{ parameters.SearchTestAssemblyFolderPath }}
   #TODO use corvelet
-  - task: PublishTestResults@2
-    displayName: Publish test results (${{ parameters.Configuration }})
-    inputs:
-      testResultsFormat: "XUnit"
-      testResultsFiles: "**/TEST-*.xml"
-      mergeTestResults: true
-

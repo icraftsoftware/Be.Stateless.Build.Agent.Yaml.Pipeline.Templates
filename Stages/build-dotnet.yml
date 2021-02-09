@@ -121,6 +121,7 @@ stages:
               - ${{ if eq(parameters.TestEngine, 'vstest') }}:
                   - template: /Steps/vstest.yml
                     parameters:
+                      SearchTestAssemblyFolderPath: "$(Build.SourcesDirectory)"
                       Configuration: ${{ parameters.Configuration }}
 
           - ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}:
@@ -128,7 +129,7 @@ stages:
               - template: /Steps/dotnet-pack.yml
                 parameters:
                   Configuration: ${{ parameters.Configuration }}
-                  OutputPath: "$(build.artifactstagingdirectory)/packages"
+                  OutputPath: "$(Build.ArtifactStagingDirectory)/packages"
 
               - template: /Steps/publish-build-artifact.yml
                 parameters:
