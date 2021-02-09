@@ -31,7 +31,7 @@ parameters:
 
 steps:
   - task: ArchiveFiles@2
-    displayName: Create BizTalk Package '${{ parameters.PackageName }}' (${{ parameters.Configuration }})
+    displayName: Create BizTalk Package (${{ parameters.Configuration }})
     ${{ if ne( parameters.Condition, '' )}}:
       condition: ${{ parameters.Condition }}
     inputs:

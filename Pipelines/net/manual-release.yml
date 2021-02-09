@@ -17,6 +17,7 @@
 #endregion
 
 parameters:
+  # TODO - To be remove
   - name: ProjectOrSolutionPath
     type: string
   - name: Major
