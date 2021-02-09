@@ -123,6 +123,53 @@ stages:
                       Configuration: ${{ parameters.Configuration }}
 
           - ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}:
+              # NuGet Packages
+              - template: /Steps/dotnet-pack.yml
+                parameters:
+                  Configuration: ${{ parameters.Configuration }}
+                  OutputPath: "$(build.artifactstagingdirectory)/packages"
+
+              - template: /Steps/publish-build-artifact.yml
+                parameters:
+                  ArtifactName: "NugetPackages"
+                  PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
+
+              - template: /Steps/find-solution-file-path.yml
+                parameters:
+                  SearchFolderPath: "$(Build.SourcesDirectory)/src"
+                  ProjectFilePattern: "*.Cmdlets.csproj"
+                  StepName: findBinaryPowerShellModule
+
+              # Binary PowerShell Modules
+              - template: /Steps/dotnet-publish.yml
+                parameters:
+                  ProjectsFilePathPattern: "$(findBinaryPowerShellModule.projectFilePaths)"
+                  Configuration: ${{ parameters.Configuration }}
+                  OutputPath: "$(Agent.TempDirectory)/powershell-modules"
+                  FlattenOutput: false
+                  Condition: eq(variables['findBinaryPowerShellModule.exists'], 'true')
+
+              - template: /Steps/download-private-code-signing-certificate.yml
+                parameters:
+                  StepName: codeSigningCertificate
+
+              - template: /Steps/build-powershell-modules.yml
+                parameters:
+                  RootModulesFolderPath: "$(Agent.TempDirectory)/powershell-modules"
+                  OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
+                  CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
+                  CodeSigningCertificatePassword: $(be-stateless-certificate-password)
+
+              - template: /Steps/publish-build-artifact.yml
+                parameters:
+                  ArtifactName: "PowerShellModules"
+                  PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
+
+              # BizTalk Deployment Packages
+              - template: /Steps/publish-build-artifact.yml
+                parameters:
+                  ArtifactName: "BizTalkPackages"
+                  PathToPublish: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
               - template: /Steps/dotnet-pack.yml
                 parameters:
                   Configuration: ${{ parameters.Configuration }}
