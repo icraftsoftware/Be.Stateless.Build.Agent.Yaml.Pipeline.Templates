@@ -38,6 +38,6 @@ steps:
       rootFolderOrFile: '${{ parameters.SourceProjectPath }}\bin\${{ parameters.Configuration }}\net48\'
       includeRootFolder: false
       archiveType: "zip"
-      archiveFile: "${{ parameters.OutputFolderPath }}/${{ parameters.PackageName }}}-$(Build.BuildNumber).zip"
+      archiveFile: "${{ parameters.OutputFolderPath }}/${{ parameters.PackageName }}-$(Build.BuildNumber).zip"
       replaceExistingArchive: true
       verbose: true
