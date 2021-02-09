@@ -17,8 +17,6 @@
 #endregion
 
 parameters:
-  - name: ProjectOrSolutionPath
-    type: string
   - name: Major
     type: number
   - name: Minor
@@ -43,8 +41,6 @@ parameters:
       - vstest
     default: dotnet
   - name: SkipBuildArtifactPublication
-    type: boolean
-  - name: SkipPowerShellModules
     type: boolean
 
 stages:
@@ -89,12 +85,12 @@ stages:
 
           - template: /Steps/dotnet-restore.yml
             parameters:
-              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+              ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
 
           - ${{ if eq(parameters.BuildEngine, 'dotnet') }}:
               - template: /Steps/dotnet-build.yml
                 parameters:
-                  ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                  ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
@@ -105,7 +101,7 @@ stages:
           - ${{ if eq(parameters.BuildEngine, 'msbuild') }}:
               - template: /Steps/msbuild-build.yml
                 parameters:
-                  ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                  ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
                   Configuration: ${{ parameters.Configuration }}
                   Major: ${{ parameters.Major }}
                   Minor: ${{ parameters.Minor }}
@@ -117,7 +113,7 @@ stages:
               - ${{ if eq(parameters.TestEngine, 'dotnet') }}:
                   - template: /Steps/dotnet-test.yml
                     parameters:
-                      ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+                      ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
                       Configuration: ${{ parameters.Configuration }}
 
                   - template: /Steps/generate-and-publish-code-coverage-report.yml
@@ -202,11 +198,16 @@ stages:
           - checkout: self
             submodules: true
 
+          - template: /Steps/find-solution-file-path.yml
+            parameters:
+              SearchFolderPath: $(Build.SourcesDirectory)
+              StepName: findSolutionFile
+
           - template: /Steps/dotnet-restore.yml
             parameters:
-              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+              ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
 
           - template: /Steps/analyze-code-with-resharper.yml
             parameters:
-              ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
+              ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
               Configuration: ${{ parameters.Configuration }}

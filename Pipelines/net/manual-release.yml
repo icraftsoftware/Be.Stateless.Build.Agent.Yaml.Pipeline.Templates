@@ -42,7 +42,6 @@ parameters:
 stages:
   - template: /Stages/build-dotnet.yml
     parameters:
-      ProjectOrSolutionPath: ${{ parameters.ProjectOrSolutionPath }}
       Major: ${{ parameters.Major }}
       Minor: ${{ parameters.Minor }}
       Configuration: Release
