@@ -78,6 +78,11 @@ stages:
           - checkout: self
             submodules: true
 
+          - template: /Steps/find-solution-file-path.yml
+            parameters:
+              SearchFolderPath: $(Build.SourcesDirectory)
+              StepName: findSolutionFile
+
           - template: /Steps/download-private-signing-key.yml
             parameters:
               StepName: privateSigningKey
@@ -134,13 +139,13 @@ stages:
                   ArtifactName: "NugetPackages"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
 
-              - template: /Steps/find-solution-file-path.yml
+              # Binary PowerShell Modules
+              - template: /Steps/find-project-files-path.yml
                 parameters:
                   SearchFolderPath: "$(Build.SourcesDirectory)/src"
                   ProjectFilePattern: "*.Cmdlets.csproj"
                   StepName: findBinaryPowerShellModule
 
-              # Binary PowerShell Modules
               - template: /Steps/dotnet-publish.yml
                 parameters:
                   ProjectsFilePathPattern: "$(findBinaryPowerShellModule.projectFilePaths)"
@@ -166,43 +171,24 @@ stages:
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
 
               # BizTalk Deployment Packages
+              - template: /Steps/find-project-files-path.yml
+                parameters:
+                  SearchFolderPath: "$(Build.SourcesDirectory)/src"
+                  ProjectFilePattern: "*.Deployment.csproj"
+                  StepName: findBizTalkPackageProject
+
+              - template: /Steps/create-biztalk-package.yml
+                parameters:
+                  PackageName: $(findSolutionFile.solutionName)
+                  Configuration: ${{ parameters.Configuration }}
+                  SourceProjectPath: "$(Build.SourcesDirectory)/src/$(findSolutionFile.solutionName)"
+                  OutputFolderPath: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
+                  Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
+
               - template: /Steps/publish-build-artifact.yml
                 parameters:
                   ArtifactName: "BizTalkPackages"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
-              - template: /Steps/dotnet-pack.yml
-                parameters:
-                  Configuration: ${{ parameters.Configuration }}
-                  OutputPath: "$(build.artifactstagingdirectory)/packages"
-
-              - template: /Steps/publish-build-artifact.yml
-                parameters:
-                  ArtifactName: "NugetPackages"
-                  PathToPublish: "$(Build.ArtifactStagingDirectory)/packages"
-
-              - ${{ if ne(parameters.SkipPowerShellModules, true) }}:
-                  - template: /Steps/dotnet-publish.yml
-                    parameters:
-                      ProjectsFilePathPattern: "$(Build.SourcesDirectory)/**/*.Cmdlets.csproj"
-                      Configuration: ${{ parameters.Configuration }}
-                      OutputPath: "$(Agent.TempDirectory)/powershell-modules"
-                      FlattenOutput: false
-
-                  - template: /Steps/download-private-code-signing-certificate.yml
-                    parameters:
-                      StepName: codeSigningCertificate
-
-                  - template: /Steps/build-powershell-modules.yml
-                    parameters:
-                      RootModulesFolderPath: "$(Agent.TempDirectory)/powershell-modules"
-                      OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
-                      CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
-                      CodeSigningCertificatePassword: $(be-stateless-certificate-password)
-
-                  - template: /Steps/publish-build-artifact.yml
-                    parameters:
-                      ArtifactName: "PowerShellModules"
-                      PathToPublish: "$(Build.ArtifactStagingDirectory)/powershell-modules"
 
       - job: analyzeCode
         displayName: "Analyze code"
