@@ -140,7 +140,7 @@ stages:
               - template: /Steps/find-file-paths.yml
                 parameters:
                   SearchFolderPath: "$(Build.SourcesDirectory)/src"
-                  ProjectFilePattern: "*.Cmdlets.csproj"
+                  FilePattern: "*.Cmdlets.csproj"
                   StepName: findBinaryPowerShellModule
 
               - template: /Steps/dotnet-publish.yml
@@ -171,7 +171,7 @@ stages:
               - template: /Steps/find-file-paths.yml
                 parameters:
                   SearchFolderPath: "$(Build.SourcesDirectory)/src"
-                  ProjectFilePattern: "*.Deployment.csproj"
+                  FilePattern: "*.Deployment.csproj"
                   StepName: findBizTalkPackageProject
 
               - template: /Steps/create-biztalk-package.yml

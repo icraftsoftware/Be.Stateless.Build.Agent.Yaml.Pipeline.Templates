@@ -42,7 +42,7 @@ stages:
           # required by implicit Test-ModuleManifest upon module publication
           - template: /Steps/restore-required-powershell-modules.yml
             parameters:
-              ModuleFolderPath: $(Build.SourcesDirectory)
+              RootModulesFolderPath: $(Build.SourcesDirectory)
 
           - template: /Steps/create-github-release.yml
 
