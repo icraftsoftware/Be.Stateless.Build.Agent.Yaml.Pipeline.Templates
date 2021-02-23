@@ -17,13 +17,13 @@
 #endregion
 
 parameters:
-  - name: RootModulesFolderPath
+  - name: ModuleRootFolderPath
     type: string
 
 steps:
   - powershell: |
-      if(Test-Path -Path ${{ parameters.RootModulesFolderPath }} -PathType Container){
-        $modules = Get-ChildItem -Path ${{ parameters.RootModulesFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
+      if(Test-Path -Path ${{ parameters.ModuleRootFolderPath }} -PathType Container){
+        $modules = Get-ChildItem -Path ${{ parameters.ModuleRootFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
         $modules | ForEach-Object -Process {
           Write-Information "Restore required modules for PowerShell module '$_'" -InformationAction Continue
           $(Build.SourcesDirectory)\.build\pwsh\restore.ps1 -Path $_.FullName

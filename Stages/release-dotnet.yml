@@ -45,9 +45,9 @@ stages:
 
           - template: /Steps/nuget-push-to-nuget-org.yml
             parameters:
-              Path: "$(System.ArtifactsDirectory)/NugetPackages"
+              NugetRootFolderPath: "$(System.ArtifactsDirectory)/NugetPackages"
 
           - template: /Steps/push-powershell-modules-on-powershell-gallery.yml
             parameters:
-              RootModulesFolderPath: "$(System.ArtifactsDirectory)/PowerShellModules"
+              ModuleRootFolderPath: "$(System.ArtifactsDirectory)/PowerShellModules"
               PowerShellGalleryApiKey: $(powershell-gallery-api-key)

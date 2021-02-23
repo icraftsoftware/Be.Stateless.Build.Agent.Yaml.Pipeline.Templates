@@ -83,11 +83,11 @@ stages:
               Condition: eq(variables['findSolutionFile.exists'], 'true')
 
           - ${{ if ne(parameters.SkipTest, true) }}:
-            - template: /Steps/dotnet-test.yml
-              parameters:
-                ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
-                Configuration: ${{ parameters.Configuration }}
-                Condition: eq(variables['findSolutionFile.exists'], 'true')
+              - template: /Steps/dotnet-test.yml
+                parameters:
+                  ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
+                  Configuration: ${{ parameters.Configuration }}
+                  Condition: eq(variables['findSolutionFile.exists'], 'true')
 
           - template: /Steps/dotnet-publish.yml
             parameters:
@@ -100,21 +100,21 @@ stages:
           - ${{ if ne(parameters.SkipTest, true) }}:
               - template: /Steps/restore-required-powershell-modules.yml
                 parameters:
-                  RootModulesFolderPath: $(Build.SourcesDirectory)/src
+                  ModuleRootFolderPath: $(Build.SourcesDirectory)/src
 
               - template: /Steps/test-powershell-module.yml
                 parameters:
                   ModuleFolderPath: $(findPowerShellModule.moduleFolderPath)
                   ResultFolderPath: "$(Build.SourcesDirectory)"
 
-          - ? ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}
-            : - template: /Steps/download-private-code-signing-certificate.yml
+          - ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}:
+              - template: /Steps/download-private-code-signing-certificate.yml
                 parameters:
                   StepName: codeSigningCertificate
 
               - template: /Steps/build-powershell-modules.yml
                 parameters:
-                  RootModulesFolderPath: "$(Build.SourcesDirectory)/src"
+                  ModuleRootFolderPath: "$(Build.SourcesDirectory)/src"
                   OutputPath: "$(Build.ArtifactStagingDirectory)"
                   CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
                   CodeSigningCertificatePassword: $(be-stateless-certificate-password)

@@ -23,6 +23,10 @@ parameters:
     type: number
   - name: Minor
     type: number
+  - name: Build
+    type: string
+  - name: Revision
+    type: string
   - name: Configuration
     type: string
     values:
@@ -40,7 +44,7 @@ steps:
       msbuildArchitecture: "x64"
       # platform: "AnyCPU"
       configuration: "${{ parameters.Configuration }}"
-      msbuildArguments: "-p:Major=${{ parameters.Major }};Minor=${{ parameters.Minor }};Build=$(VersionBuild);Revision=$(VersionRevision);AssemblyOriginatorKeyFile=${{ parameters.PrivateSigningKeyPath }};GeneratePackageOnBuild=false"
+      msbuildArguments: "-p:Major=${{ parameters.Major }};Minor=${{ parameters.Minor }};Build=${{ parameters.Build }};Revision=${{ parameters.Revision }};AssemblyOriginatorKeyFile=${{ parameters.PrivateSigningKeyPath }};GeneratePackageOnBuild=false"
       clean: false
       restoreNugetPackages: false
       # createLogFile: true

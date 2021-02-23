@@ -16,7 +16,7 @@
 
 #endregion
 parameters:
-  - name: RootModulesFolderPath
+  - name: ModuleRootFolderPath
     type: string
   - name: OutputPath
     type: string
@@ -27,11 +27,11 @@ parameters:
 
 steps:
   - powershell: |
-      if(Test-Path -Path ${{ parameters.RootModulesFolderPath }} -PathType Container){
+      if(Test-Path -Path ${{ parameters.ModuleRootFolderPath }} -PathType Container){
         if (-not (Test-Path -LiteralPath ${{ parameters.OutputPath }})) {
           New-Item -Path ${{ parameters.OutputPath }} -ItemType Directory -ErrorAction Stop | Out-Null
         }
-        $modules = Get-ChildItem -Path ${{ parameters.RootModulesFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
+        $modules = Get-ChildItem -Path ${{ parameters.ModuleRootFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
         $modules | ForEach-Object -Process {
           Write-Information "Build PowerShell module '$_'" -InformationAction Continue
           $(Build.SourcesDirectory)\.build\pwsh\build.ps1 -Path $_.FullName -Destination '${{ parameters.OutputPath }}' -ModuleVersion $(Build.BuildNumber) -CertificateFilePath ${{ parameters.CodeSigningCertificatePath }} -CertificatePassword $(ConvertTo-SecureString "${{ parameters.CodeSigningCertificatePassword }}" -AsPlainText -Force)

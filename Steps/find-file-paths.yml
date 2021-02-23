@@ -27,10 +27,10 @@ parameters:
 steps:
   - powershell: |
       $files = @(Get-ChildItem -Path ${{ parameters.SearchFolderPath }} -Filter ${{ parameters.FilePattern }} -Recurse)
-      $filesExist = $null -ne $files
+      $filesExist = $null -ne $files -and $files.Count -gt 0
       $filePaths = $files.FullName -join ';'
       Write-Host "Found files: $filePaths"
       Write-Host "##vso[task.setvariable variable=exists;isOutput=true]$filesExist"
       Write-Host "##vso[task.setvariable variable=filePaths;isOutput=true]$filePaths"
-    displayName: Find file mathcing '${{ parameters.FilePattern }}'
+    displayName: Find file matching '${{ parameters.FilePattern }}'
     name: ${{ parameters.StepName }}

@@ -140,7 +140,7 @@ stages:
               - template: /Steps/find-file-paths.yml
                 parameters:
                   SearchFolderPath: "$(Build.SourcesDirectory)/src"
-                  ProjectFilePattern: "*.Cmdlets.csproj"
+                  FilePattern: "*.Cmdlets.csproj"
                   StepName: findBinaryPowerShellModule
 
               - template: /Steps/dotnet-publish.yml
@@ -157,7 +157,7 @@ stages:
 
               - template: /Steps/build-powershell-modules.yml
                 parameters:
-                  RootModulesFolderPath: "$(Agent.TempDirectory)/powershell-modules"
+                  ModuleRootFolderPath: "$(Agent.TempDirectory)/powershell-modules"
                   OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
                   CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
                   CodeSigningCertificatePassword: $(be-stateless-certificate-password)
@@ -171,7 +171,7 @@ stages:
               - template: /Steps/find-file-paths.yml
                 parameters:
                   SearchFolderPath: "$(Build.SourcesDirectory)/src"
-                  ProjectFilePattern: "*.Deployment.csproj"
+                  FilePattern: "*.Deployment.csproj"
                   StepName: findBizTalkPackageProject
 
               - template: /Steps/create-biztalk-package.yml

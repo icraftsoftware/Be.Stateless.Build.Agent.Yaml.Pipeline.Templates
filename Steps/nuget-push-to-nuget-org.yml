@@ -17,7 +17,7 @@
 #endregion
 
 parameters:
-  - name: Path
+  - name: NugetRootFolderPath
     type: string
 
 steps:
@@ -25,7 +25,7 @@ steps:
     displayName: nuget push
     inputs:
       command: "push"
-      packagesToPush: "${{ parameters.Path }}/**/*.nupkg"
+      packagesToPush: "${{ parameters.NugetRootFolderPath }}/**/*.nupkg"
       nuGetFeedType: "external"
       publishFeedCredentials: "nuget.org_be.stateless"
       verbosityPush: "Normal"

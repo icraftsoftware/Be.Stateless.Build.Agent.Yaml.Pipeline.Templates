@@ -42,11 +42,11 @@ stages:
           # required by implicit Test-ModuleManifest upon module publication
           - template: /Steps/restore-required-powershell-modules.yml
             parameters:
-              ModuleFolderPath: $(Build.SourcesDirectory)
+              ModuleRootFolderPath: $(System.ArtifactsDirectory)/PowerShellModule
 
           - template: /Steps/create-github-release.yml
 
           - template: /Steps/push-powershell-modules-on-powershell-gallery.yml
             parameters:
-              RootModulesFolderPath: "$(System.ArtifactsDirectory)/PowerShellModule"
+              ModuleRootFolderPath: "$(System.ArtifactsDirectory)/PowerShellModule"
               PowerShellGalleryApiKey: $(powershell-gallery-api-key)
