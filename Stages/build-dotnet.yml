@@ -150,6 +150,7 @@ stages:
                   OutputPath: "$(Agent.TempDirectory)/powershell-modules"
                   FlattenOutput: false
                   Condition: eq(variables['findBinaryPowerShellModule.exists'], 'true')
+                  Arguments: '--no-build'
 
               - template: /Steps/download-private-code-signing-certificate.yml
                 parameters:
@@ -174,11 +175,19 @@ stages:
                   FilePattern: "*.Deployment.csproj"
                   StepName: findBizTalkPackageProject
 
+              - template: /Steps/dotnet-publish.yml
+                parameters:
+                  ProjectsFilePathPattern: "$(findBizTalkPackageProject.filePaths)"
+                  Configuration: ${{ parameters.Configuration }}
+                  OutputPath: "$(Agent.TempDirectory)/bts-packages/$(findSolutionFile.solutionName)/$(Build.BuildNumber)"
+                  FlattenOutput: false
+                  Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
+                  Arguments: '--no-restore'
+
               - template: /Steps/create-biztalk-package.yml
                 parameters:
                   PackageName: $(findSolutionFile.solutionName)
-                  Configuration: ${{ parameters.Configuration }}
-                  SourceProjectPath: "$(Build.SourcesDirectory)/src/$(findSolutionFile.solutionName)"
+                  InputFolderPath: "$(Agent.TempDirectory)/bts-packages/$(findSolutionFile.solutionName)/"
                   OutputFolderPath: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
                   Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
 

@@ -19,9 +19,7 @@
 parameters:
   - name: PackageName
     type: string
-  - name: Configuration
-    type: string
-  - name: SourceProjectPath
+  - name: InputFolderPath
     type: string
   - name: OutputFolderPath
     type: string
@@ -30,23 +28,12 @@ parameters:
     default: ""
 
 steps:
-  - task: CopyFiles@2
-    displayName: Copy BizTalk Package content (${{ parameters.Configuration }})
-    ${{ if ne( parameters.Condition, '' )}}:
-      condition: ${{ parameters.Condition }}
-    inputs:
-      sourceFolder: '${{ parameters.SourceProjectPath }}\bin\${{ parameters.Configuration }}\net48\'
-      contents: '**'
-      targetFolder: "$(Agent.TempDirectory)/bts-package/${{ parameters.PackageName }}/$(Build.BuildNumber)"
-      cleanTargetFolder: true
-      flattenFolders: false
-      preserveTimestamp: true
   - task: ArchiveFiles@2
-    displayName: Create BizTalk Package (${{ parameters.Configuration }})
+    displayName: Create BizTalk Package
     ${{ if ne( parameters.Condition, '' )}}:
       condition: ${{ parameters.Condition }}
     inputs:
-      rootFolderOrFile: "$(Agent.TempDirectory)/bts-package/${{ parameters.PackageName }}"
+      rootFolderOrFile: "${{ parameters.InputFolderPath }}"
       includeRootFolder: false
       archiveType: "zip"
       archiveFile: "${{ parameters.OutputFolderPath }}/${{ parameters.PackageName }}.zip"

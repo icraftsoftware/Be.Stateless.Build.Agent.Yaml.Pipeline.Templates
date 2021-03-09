@@ -31,6 +31,9 @@ parameters:
   - name: Condition
     type: string
     default: ''
+  - name: Arguments
+    type: string
+    default: ''
 
 steps:
   - task: DotNetCoreCLI@2
@@ -41,7 +44,7 @@ steps:
       command: publish
       projects: "${{ parameters.ProjectsFilePathPattern }}"
       configuration: "${{ parameters.Configuration }}"
-      arguments: "--configuration ${{ parameters.Configuration }} --output ${{ parameters.OutputPath }} --no-build"
+      arguments: "--configuration ${{ parameters.Configuration }} --output ${{ parameters.OutputPath }} ${{ parameters.Arguments }}"
       publishWebProjects: false
       zipAfterPublish: false
       modifyOutputPath: ${{ not(parameters.FlattenOutput) }}

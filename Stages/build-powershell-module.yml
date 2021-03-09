@@ -96,6 +96,8 @@ stages:
               Condition: eq(variables['findSolutionFile.exists'], 'true')
               OutputPath: "$(Build.SourcesDirectory)/src/$(findPowerShellModule.moduleName)/bin/"
               FlattenOutput: true
+              Arguments: '--no-build'
+
 
           - ${{ if ne(parameters.SkipTest, true) }}:
               - template: /Steps/restore-required-powershell-modules.yml
