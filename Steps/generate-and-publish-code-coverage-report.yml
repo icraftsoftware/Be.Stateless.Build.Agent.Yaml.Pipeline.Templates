@@ -17,17 +17,25 @@
 #endregion
 
 steps:
+  - template: /Steps/find-file-paths.yml
+    parameters:
+      SearchFolderPath: "$(Build.SourcesDirectory)"
+      FilePattern: "coverage.*.xml"
+      StepName: findCoverageFiles
+
   - task: reportgenerator@4
     displayName: generate code coverage report
+    condition: eq(variables['findCoverageFiles.exists'], 'true')
     inputs:
       reports: '$(Build.SourcesDirectory)\**\coverage.*.xml'
-      targetdir: 'coverage'
+      targetdir: "coverage"
       reporttypes: "HtmlInline_AzurePipelines;Cobertura;Badges"
       assemblyfilters: "-xunit*"
       verbosity: "Info" # Verbose, Info, Warning, Error, Off
 
   - task: PublishCodeCoverageResults@1
     displayName: publish code coverage report
+    condition: eq(variables['findCoverageFiles.exists'], 'true')
     inputs:
       codeCoverageTool: Cobertura
       summaryFileLocation: '$(Build.SourcesDirectory)\coverage\cobertura.xml'
