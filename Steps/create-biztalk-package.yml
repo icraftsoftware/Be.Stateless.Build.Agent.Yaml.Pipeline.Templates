@@ -30,14 +30,25 @@ parameters:
     default: ""
 
 steps:
+  - task: CopyFiles@2
+    displayName: Copy BizTalk Package content (${{ parameters.Configuration }})
+    ${{ if ne( parameters.Condition, '' )}}:
+      condition: ${{ parameters.Condition }}
+    inputs:
+      sourceFolder: '${{ parameters.SourceProjectPath }}\bin\${{ parameters.Configuration }}\net48\'
+      contents: '**'
+      targetFolder: "$(Agent.TempDirectory)/bts-package/${{ parameters.PackageName }}/$(Build.BuildNumber)"
+      cleanTargetFolder: true
+      flattenFolders: false
+      preserveTimestamp: true
   - task: ArchiveFiles@2
     displayName: Create BizTalk Package (${{ parameters.Configuration }})
     ${{ if ne( parameters.Condition, '' )}}:
       condition: ${{ parameters.Condition }}
     inputs:
-      rootFolderOrFile: '${{ parameters.SourceProjectPath }}\bin\${{ parameters.Configuration }}\net48\'
+      rootFolderOrFile: "$(Agent.TempDirectory)/bts-package/${{ parameters.PackageName }}"
       includeRootFolder: false
       archiveType: "zip"
-      archiveFile: "${{ parameters.OutputFolderPath }}/${{ parameters.PackageName }}-$(Build.BuildNumber).zip"
+      archiveFile: "${{ parameters.OutputFolderPath }}/${{ parameters.PackageName }}.zip"
       replaceExistingArchive: true
       verbose: true
