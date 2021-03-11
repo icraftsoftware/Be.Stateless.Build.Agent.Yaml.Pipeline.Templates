@@ -162,6 +162,7 @@ stages:
                   OutputPath: "$(Build.ArtifactStagingDirectory)/powershell-modules"
                   CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
                   CodeSigningCertificatePassword: $(be-stateless-certificate-password)
+                  Condition: eq(variables['findBinaryPowerShellModule.exists'], 'true')
 
               - template: /Steps/publish-build-artifact.yml
                 parameters:
@@ -179,8 +180,8 @@ stages:
                 parameters:
                   ProjectsFilePathPattern: "$(findBizTalkPackageProject.filePaths)"
                   Configuration: ${{ parameters.Configuration }}
-                  OutputPath: "$(Agent.TempDirectory)/bts-packages/$(findSolutionFile.solutionName)/$(Build.BuildNumber)"
-                  FlattenOutput: false
+                  OutputPath: "$(Agent.TempDirectory)/bts-packages/$(findBizTalkPackageProject.fileNames)/$(Build.BuildNumber)"
+                  FlattenOutput: true
                   Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
                   Arguments: '--no-restore'
 
