@@ -29,8 +29,10 @@ steps:
       $files = @(Get-ChildItem -Path ${{ parameters.SearchFolderPath }} -Filter ${{ parameters.FilePattern }} -Recurse)
       $filesExist = $null -ne $files -and $files.Count -gt 0
       $filePaths = $files.FullName -join ';'
+      $fileNames = $files.BaseName -join ';'
       Write-Host "Found files: $filePaths"
       Write-Host "##vso[task.setvariable variable=exists;isOutput=true]$filesExist"
       Write-Host "##vso[task.setvariable variable=filePaths;isOutput=true]$filePaths"
+      Write-Host "##vso[task.setvariable variable=fileNames;isOutput=true]$fileNames"
     displayName: Find file matching '${{ parameters.FilePattern }}'
     name: ${{ parameters.StepName }}

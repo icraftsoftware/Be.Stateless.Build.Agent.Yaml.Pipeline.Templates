@@ -24,6 +24,9 @@ parameters:
     type: string
   - name: CodeSigningCertificatePassword
     type: string
+  - name: Condition
+    type: string
+    default: ''
 
 steps:
   - powershell: |
@@ -39,3 +42,5 @@ steps:
       }
     displayName: build powershell modules
     name: buildPowerShellModules
+    ${{ if ne( parameters.Condition, '' )}}:
+      condition: ${{ parameters.Condition }}
