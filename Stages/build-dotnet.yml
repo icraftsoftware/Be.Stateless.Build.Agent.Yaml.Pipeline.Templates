@@ -180,7 +180,7 @@ stages:
                   ProjectsFilePathPattern: "$(findBizTalkPackageProject.filePaths)"
                   Configuration: ${{ parameters.Configuration }}
                   OutputPath: "$(Agent.TempDirectory)/bts-packages/$(findSolutionFile.solutionName)/$(Build.BuildNumber)"
-                  FlattenOutput: false
+                  FlattenOutput: true
                   Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
                   Arguments: '--no-restore'
 

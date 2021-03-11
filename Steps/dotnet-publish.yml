@@ -46,5 +46,5 @@ steps:
       configuration: "${{ parameters.Configuration }}"
       arguments: "--configuration ${{ parameters.Configuration }} --output ${{ parameters.OutputPath }} ${{ parameters.Arguments }}"
       publishWebProjects: false
-      zipAfterPublish: true
+      zipAfterPublish: false
       modifyOutputPath: ${{ not(parameters.FlattenOutput) }}
