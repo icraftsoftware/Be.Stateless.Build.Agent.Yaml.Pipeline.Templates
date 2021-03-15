@@ -187,8 +187,8 @@ stages:
 
               - template: /Steps/create-biztalk-package.yml
                 parameters:
-                  PackageName: $(findSolutionFile.solutionName)
-                  InputFolderPath: "$(Agent.TempDirectory)/bts-packages/$(findSolutionFile.solutionName)/"
+                  PackageName: $(findBizTalkPackageProject.fileNames)
+                  InputFolderPath: "$(Agent.TempDirectory)/bts-packages/$(findBizTalkPackageProject.fileNames)/"
                   OutputFolderPath: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
                   Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
 
