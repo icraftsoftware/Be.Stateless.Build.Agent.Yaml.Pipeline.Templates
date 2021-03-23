@@ -36,5 +36,6 @@ steps:
     inputs:
       command: test
       projects: "${{ parameters.ProjectOrSolutionPath }}"
-      arguments: "--no-build --configuration ${{ parameters.Configuration }} -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura"
+      arguments: "--no-build --configuration ${{ parameters.Configuration }}"
+      # arguments: "--no-build --configuration ${{ parameters.Configuration }} -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura"
       publishTestResults: true

@@ -116,7 +116,7 @@ stages:
                       ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
                       Configuration: ${{ parameters.Configuration }}
 
-                  - template: /Steps/generate-and-publish-code-coverage-report.yml
+                  # - template: /Steps/generate-and-publish-code-coverage-report.yml
 
               - ${{ if eq(parameters.TestEngine, 'vstest') }}:
                   - template: /Steps/vstest.yml
@@ -197,28 +197,28 @@ stages:
                   ArtifactName: "BizTalkPackages"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
 
-      - job: analyzeCode
-        displayName: "Analyze code"
-        dependsOn: prepare
-        condition: succeeded()
-        pool:
-          vmImage: "windows-latest"
-          workspace:
-            clean: all
-        steps:
-          - checkout: self
-            submodules: true
+      # - job: analyzeCode
+      #   displayName: "Analyze code"
+      #   dependsOn: prepare
+      #   condition: succeeded()
+      #   pool:
+      #     vmImage: "windows-latest"
+      #     workspace:
+      #       clean: all
+      #   steps:
+      #     - checkout: self
+      #       submodules: true
 
-          - template: /Steps/find-solution-file-path.yml
-            parameters:
-              SearchFolderPath: $(Build.SourcesDirectory)
-              StepName: findSolutionFile
+      #     - template: /Steps/find-solution-file-path.yml
+      #       parameters:
+      #         SearchFolderPath: $(Build.SourcesDirectory)
+      #         StepName: findSolutionFile
 
-          - template: /Steps/dotnet-restore.yml
-            parameters:
-              ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
+      #     - template: /Steps/dotnet-restore.yml
+      #       parameters:
+      #         ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
 
-          - template: /Steps/analyze-code-with-resharper.yml
-            parameters:
-              ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
-              Configuration: ${{ parameters.Configuration }}
+      #     - template: /Steps/analyze-code-with-resharper.yml
+      #       parameters:
+      #         ProjectOrSolutionPath: $(findSolutionFile.solutionFilePath)
+      #         Configuration: ${{ parameters.Configuration }}

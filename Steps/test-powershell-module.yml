@@ -28,8 +28,8 @@ steps:
     inputs:
       scriptFolder: '${{ parameters.ModuleFolderPath }}'
       resultsFile: "${{ parameters.ResultFolderPath }}/powershell-module.tests.xml"
-      CodeCoverageOutputFile: '${{ parameters.ResultFolderPath }}\coverage.powershell-module.xml'
-      CodeCoverageFolder: '${{ parameters.ModuleFolderPath }}'
+      # CodeCoverageOutputFile: '${{ parameters.ResultFolderPath }}\coverage.powershell-module.xml'
+      # CodeCoverageFolder: '${{ parameters.ModuleFolderPath }}'
       usePSCore: False
     continueOnError: true
   - task: PublishTestResults@2
@@ -40,10 +40,10 @@ steps:
       mergeTestResults: true
       failTaskOnFailedTests: true
       testRunTitle: "PowerShell Module Tests"
-  - task: PublishCodeCoverageResults@1
-    displayName: "publish code coverage"
-    inputs:
-      codeCoverageTool: "JaCoCo"
-      summaryFileLocation: '${{ parameters.ResultFolderPath }}\coverage.powershell-module.xml'
-      pathToSources: '${{ parameters.ModuleFolderPath }}'
-      failIfCoverageEmpty: false
+  # - task: PublishCodeCoverageResults@1
+  #   displayName: "publish code coverage"
+  #   inputs:
+  #     codeCoverageTool: "JaCoCo"
+  #     summaryFileLocation: '${{ parameters.ResultFolderPath }}\coverage.powershell-module.xml'
+  #     pathToSources: '${{ parameters.ModuleFolderPath }}'
+  #     failIfCoverageEmpty: false
