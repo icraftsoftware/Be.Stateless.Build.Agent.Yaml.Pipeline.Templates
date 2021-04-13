@@ -183,7 +183,7 @@ stages:
                   OutputPath: "$(Agent.TempDirectory)/bts-packages/$(findBizTalkPackageProject.fileNames)/$(Build.BuildNumber)"
                   FlattenOutput: true
                   Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
-                  Arguments: '--no-restore'
+                  Arguments: '--no-build'
 
               - template: /Steps/create-biztalk-package.yml
                 parameters:
