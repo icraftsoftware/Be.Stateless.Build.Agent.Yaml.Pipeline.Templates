@@ -178,19 +178,13 @@ stages:
 
               - template: /Steps/dotnet-publish.yml
                 parameters:
-                  ProjectsFilePathPattern: "$(findBizTalkPackageProject.filePaths)"
+                  ProjectsFilePathPattern: "**/*.Deployment.csproj"
                   Configuration: ${{ parameters.Configuration }}
-                  OutputPath: "$(Agent.TempDirectory)/bts-packages/$(findBizTalkPackageProject.fileNames)/$(Build.BuildNumber)"
-                  FlattenOutput: true
+                  OutputPath: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
+                  FlattenOutput: false
+                  ZipAfterPublish: true
                   Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
-                  Arguments: '--no-build'
-
-              - template: /Steps/create-biztalk-package.yml
-                parameters:
-                  PackageName: $(findBizTalkPackageProject.fileNames)
-                  InputFolderPath: "$(Agent.TempDirectory)/bts-packages/$(findBizTalkPackageProject.fileNames)/"
-                  OutputFolderPath: "$(Build.ArtifactStagingDirectory)/biztalk-packages"
-                  Condition: eq(variables['findBizTalkPackageProject.exists'], 'true')
+                  Arguments: '--no-build -p:FileVersion=$(Build.BuildNumber)'
 
               - template: /Steps/publish-build-artifact.yml
                 parameters:
