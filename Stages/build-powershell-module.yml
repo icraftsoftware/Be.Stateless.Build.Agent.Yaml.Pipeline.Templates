@@ -1,4 +1,4 @@
-#region Copyright & License
+﻿#region Copyright & License
 
 # Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
@@ -96,8 +96,7 @@ stages:
               Condition: eq(variables['findSolutionFile.exists'], 'true')
               OutputPath: "$(Build.SourcesDirectory)/src/$(findPowerShellModule.moduleName)/bin/"
               FlattenOutput: true
-              Arguments: '--no-build'
-
+              Arguments: "--no-build"
 
           - ${{ if ne(parameters.SkipTest, true) }}:
               - template: /Steps/restore-required-powershell-modules.yml

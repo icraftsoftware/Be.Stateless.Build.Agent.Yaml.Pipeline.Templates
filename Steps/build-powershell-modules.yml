@@ -1,4 +1,4 @@
-#region Copyright & License
+﻿#region Copyright & License
 
 # Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
 #
@@ -26,7 +26,7 @@ parameters:
     type: string
   - name: Condition
     type: string
-    default: ''
+    default: ""
 
 steps:
   - powershell: |
