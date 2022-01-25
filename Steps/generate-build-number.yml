@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,5 +30,5 @@ steps:
       Write-Host "##vso[task.setvariable variable=VersionRevision;isOutput=true]$revision"
       Write-Host "##vso[build.updatebuildnumber]${{ parameters.Major }}.${{ parameters.Minor }}.$build.$revision"
       Write-Host "Build=$build|Revision=$revision"
-    displayName: generate build number
+    displayName: Generate Build Number
     name: generateBuildNumber

@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@
 #endregion
 
 parameters:
-  - name: ModuleRootFolderPath
+  - name: ModuleFolderPath
     type: string
 
 steps:
   - powershell: |
-      if(Test-Path -Path ${{ parameters.ModuleRootFolderPath }} -PathType Container){
-        $modules = Get-ChildItem -Path ${{ parameters.ModuleRootFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
-        $modules | ForEach-Object -Process {
-          Write-Information "Restore required modules for PowerShell module '$_'" -InformationAction Continue
-          $(Build.SourcesDirectory)\.build\pwsh\restore.ps1 -Path $_.FullName
-        }
+      if (Test-Path -Path ${{ parameters.ModuleFolderPath }} -PathType Container) {
+        Write-Host "Restoring Required PowerShell Modules"
+        $(Build.SourcesDirectory)\.build\pwsh\restore.ps1 -Path '${{ parameters.ModuleFolderPath }}'
       }
-    displayName: restore required PowerShell modules
+    displayName: Restore Required PowerShell Modules
     name: restoreRequiredPowerShellModules

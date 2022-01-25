@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 #endregion
 parameters:
-  - name: ModuleRootFolderPath
+  - name: ModuleFolderPath
     type: string
   - name: PowerShellGalleryApiKey
     type: string
 
 steps:
   - powershell: |
-      if(Test-Path -Path ${{ parameters.ModuleRootFolderPath }} -PathType Container){
-        $modules = Get-ChildItem -Path ${{ parameters.ModuleRootFolderPath }} -Directory | Where-Object { Join-Path $_.FullName *.psd1 | Test-Path }
-        $modules | ForEach-Object -Process {
-          Write-Information "Publish PowerShell module '$_'" -InformationAction Continue
-          $(Build.SourcesDirectory)\.build\pwsh\push.ps1 -Path $_.FullName -NuGetApiKey ${{ parameters.PowerShellGalleryApiKey }}
+      if (Test-Path -Path ${{ parameters.ModuleFolderPath }} -PathType Container) {
+        Get-ChildItem -Path ${{ parameters.ModuleFolderPath }} -Directory | Where-Object -FilterScript { (Test-Path -Path "$($_.FullName)\*.psd1") } | ForEach-Object -Process {
+          Write-Host "Publishing PowerShell Module '$($_.BaseName)'"
+          Publish-Module -Path $_.FullName -NuGetApiKey ${{ parameters.PowerShellGalleryApiKey }}
         }
       }
-    displayName: publish powershell modules
+    displayName: Publish PowerShell Module
     name: publishPowerShellModules

@@ -1,0 +1,39 @@
+﻿#region Copyright & License
+
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#endregion
+
+parameters:
+  - name: SearchFolderPath
+    type: string
+  - name: StepName
+    type: string
+
+steps:
+  - powershell: |
+      $solutionFile = Get-ChildItem -Path ${{ parameters.SearchFolderPath }} -Filter *.sln
+      if ((Measure-Object -InputObject $solutionFile).Count -gt 1) {
+        Write-Host "##vso[task.LogIssue type=error;]Multiple solution files found ($($solutionFile -join ', '))."
+        $host.SetShouldExit(1)
+        exit
+      }
+      $existSolutionFile = $null -ne $solutionFile
+      Write-Host "##vso[task.setvariable variable=exists;isOutput=true]$existSolutionFile"
+      Write-Host "##vso[task.setvariable variable=solutionFilePath;isOutput=true]$($solutionFile.FullName)"
+      Write-Host "##vso[task.setvariable variable=solutionName;isOutput=true]$($solutionFile.BaseName)"
+      Write-Host "Found solution file: $($solutionFile.FullName)"
+    displayName: Find Solution File in '${{ parameters.SearchFolderPath }}'
+    name: ${{ parameters.StepName }}

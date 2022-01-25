@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ steps:
       StepName: findCoverageFiles
 
   - task: reportgenerator@4
-    displayName: generate code coverage report
+    displayName: Generate Code Coverage Report
     condition: eq(variables['findCoverageFiles.exists'], 'true')
     inputs:
       reports: '$(Build.SourcesDirectory)\**\coverage.*.xml'
@@ -34,7 +34,7 @@ steps:
       verbosity: "Info" # Verbose, Info, Warning, Error, Off
 
   - task: PublishCodeCoverageResults@1
-    displayName: publish code coverage report
+    displayName: Publish Code Coverage Report
     condition: eq(variables['findCoverageFiles.exists'], 'true')
     inputs:
       codeCoverageTool: Cobertura

@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 stages:
   - stage: release
-    displayName: "Release stage"
+    displayName: "Release Stage"
     dependsOn: build
     condition: succeeded()
     variables:
@@ -29,12 +29,12 @@ stages:
           vmImage: "windows-latest"
           workspace:
             clean: all
-        displayName: "Create github release, publish package on nuget.org and publish pwsh modules on PowerShell Gallery"
+        displayName: "Create Github Release, Publish Packages on nuget.org and PowerShell Module on PowerShell Gallery"
         steps:
           - checkout: self
             submodules: true
 
-          - template: /Steps/download-all-build-artifacts.yml
+          - template: /Steps/download-build-artifact-collection.yml
             parameters:
               DownloadPath: "$(System.ArtifactsDirectory)"
               ArtifactPattern: "@(PowerShellModules|NugetPackages|BizTalkPackages)"
@@ -45,9 +45,9 @@ stages:
 
           - template: /Steps/nuget-push-to-nuget-org.yml
             parameters:
-              NugetRootFolderPath: "$(System.ArtifactsDirectory)/NugetPackages"
+              NugetFolderPath: "$(System.ArtifactsDirectory)/NugetPackages"
 
           - template: /Steps/push-powershell-modules-on-powershell-gallery.yml
             parameters:
-              ModuleRootFolderPath: "$(System.ArtifactsDirectory)/PowerShellModules"
+              ModuleFolderPath: "$(System.ArtifactsDirectory)/PowerShellModules"
               PowerShellGalleryApiKey: $(powershell-gallery-api-key)

@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ parameters:
 
 steps:
   - task: PowerShell@2
-    displayName: check build artifact '${{ parameters.ArtifactName }}' to publish
+    displayName: Check Availability of Build Artifact '${{ parameters.ArtifactName }}' to Publish
     name: ${{ format('check{0}BuildArtifactAvailable', parameters.ArtifactName) }}
     inputs:
       targetType: inline
       script: Write-Host "##vso[task.setvariable variable=IsBuildArtifactAvailable;isOutput=true]$(Test-Path -Path ${{ parameters.PathToPublish }}\*)"
 
   - task: PublishBuildArtifacts@1
-    displayName: publish build artifact '${{ parameters.ArtifactName }}'
+    displayName: Publish Build Artifact '${{ parameters.ArtifactName }}'
     condition: eq(variables['${{ format('check{0}BuildArtifactAvailable', parameters.ArtifactName)}}.IsBuildArtifactAvailable'], 'true')
     inputs:
-      PathtoPublish: ${{ parameters.PathToPublish }}
+      PathToPublish: ${{ parameters.PathToPublish }}
       ArtifactName: ${{ parameters.ArtifactName }}
       publishLocation: "Container"

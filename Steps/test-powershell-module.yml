@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ parameters:
 
 steps:
   - task: Pester@10
-    displayName: "test PowerShell module with Pester"
+    displayName: "Run Pester Tests"
     inputs:
       scriptFolder: "${{ parameters.ModuleFolderPath }}"
       resultsFile: "${{ parameters.ResultFolderPath }}/powershell-module.tests.xml"
@@ -33,7 +33,7 @@ steps:
       usePSCore: False
     continueOnError: true
   - task: PublishTestResults@2
-    displayName: "publish test results"
+    displayName: "Publish Test Results"
     inputs:
       testResultsFormat: "NUnit"
       testResultsFiles: "${{ parameters.ResultFolderPath }}/powershell-module.tests.xml"
@@ -41,7 +41,7 @@ steps:
       failTaskOnFailedTests: true
       testRunTitle: "PowerShell Module Tests"
   # - task: PublishCodeCoverageResults@1
-  #   displayName: "publish code coverage"
+  #   displayName: "Publish Code Coverage"
   #   inputs:
   #     codeCoverageTool: "JaCoCo"
   #     summaryFileLocation: '${{ parameters.ResultFolderPath }}\coverage.powershell-module.xml'

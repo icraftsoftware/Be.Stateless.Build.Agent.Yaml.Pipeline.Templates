@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ parameters:
 
 stages:
   - stage: build
-    displayName: "Build stage"
+    displayName: "Build Stage"
     variables:
       - group: "code-signing-certificates"
     jobs:
@@ -42,7 +42,7 @@ stages:
           vmImage: "windows-latest"
           workspace:
             clean: all
-        displayName: "Build, test and sign PowerShell module"
+        displayName: "Build, Test, and Sign PowerShell Module"
         steps:
           - checkout: self
             submodules: true
@@ -52,12 +52,12 @@ stages:
               Major: ${{ parameters.Major }}
               Minor: ${{ parameters.Minor }}
 
-          - template: /Steps/find-powershell-module-name.yml
+          - template: /Steps/find-powershell-module.yml
             parameters:
               SearchFolderPath: $(Build.SourcesDirectory)/src
               StepName: findPowerShellModule
 
-          - template: /Steps/find-solution-file-path.yml
+          - template: /Steps/find-solution-file.yml
             parameters:
               SearchFolderPath: $(Build.SourcesDirectory)
               StepName: findSolutionFile
@@ -101,26 +101,26 @@ stages:
           - ${{ if ne(parameters.SkipTest, true) }}:
               - template: /Steps/restore-required-powershell-modules.yml
                 parameters:
-                  ModuleRootFolderPath: $(Build.SourcesDirectory)/src
+                  ModuleFolderPath: "$(findPowerShellModule.moduleFolderPath)"
 
               - template: /Steps/test-powershell-module.yml
                 parameters:
-                  ModuleFolderPath: $(findPowerShellModule.moduleFolderPath)
+                  ModuleFolderPath: "$(findPowerShellModule.moduleFolderPath)"
                   ResultFolderPath: "$(Build.SourcesDirectory)"
 
           - ${{ if ne(parameters.SkipBuildArtifactPublication, true) }}:
-              - template: /Steps/download-private-code-signing-certificate.yml
+              - template: /Steps/download-private-signing-certificate.yml
                 parameters:
                   StepName: codeSigningCertificate
 
-              - template: /Steps/build-powershell-modules.yml
+              - template: /Steps/build-powershell-module.yml
                 parameters:
-                  ModuleRootFolderPath: "$(Build.SourcesDirectory)/src"
+                  ModuleFolderPath: "$(findPowerShellModule.moduleFolderPath)"
                   OutputPath: "$(Build.ArtifactStagingDirectory)"
                   CodeSigningCertificatePath: $(codeSigningCertificate.secureFilePath)
                   CodeSigningCertificatePassword: $(be-stateless-certificate-password)
 
               - template: /Steps/publish-build-artifact.yml
                 parameters:
-                  ArtifactName: "PowerShellModule"
+                  ArtifactName: "PowerShellModules"
                   PathToPublish: "$(Build.ArtifactStagingDirectory)"
