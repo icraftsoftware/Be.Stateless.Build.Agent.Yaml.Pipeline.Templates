@@ -1,0 +1,113 @@
+﻿#region Copyright & License
+
+# Copyright © 2012 - 2022 François Chabot
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#endregion
+
+parameters:
+  - name: major
+    type: number
+  - name: minor
+    type: number
+  - name: isRelease
+    type: boolean
+    default: false
+  - name: toolSet
+    type: string
+    default: dotnet
+    values:
+      - dotnet
+      - msbuild
+  - name: skipBuildArtifacts
+    type: boolean
+  - name: skipTests
+    type: boolean
+
+stages:
+  - stage: build
+    displayName: Build Stage
+    variables:
+      - group: code-signing-certificates
+    jobs:
+      - job: build
+        displayName: Build, Test, and Pack PowerShell Modules
+        pool:
+          vmImage: windows-latest
+          workspace:
+            clean: all
+        steps:
+          - checkout: self
+            submodules: true
+
+          - template: /Steps/generate-build-number.yml
+            parameters:
+              Major: ${{ parameters.Major }}
+              Minor: ${{ parameters.Minor }}
+              isRelease: ${{ parameters.isRelease }}
+              stepName: buildNumber
+
+          # are there binary module pieces to build? (nested binary modules or just binary modules)
+          - template: /Steps/look-up-file.yml
+            parameters:
+              path: $(Build.SourcesDirectory)
+              filter: "*.sln"
+              stepName: solutionFile
+
+          # build binary module pieces and ...
+          - template: /Steps/build-dotnet-assemblies.yml
+            parameters:
+              path: $(Build.SourcesDirectory)
+              major: $(buildNumber.major)
+              minor: $(buildNumber.minor)
+              build: $(buildNumber.build)
+              revision: $(buildNumber.revision)
+              ${{ if eq(parameters.isRelease, true) }}:
+                configuration: Release
+              ${{ else }}:
+                configuration: Debug
+              toolSet: ${{ parameters.toolSet }}
+              skipBuildArtifacts: ${{ parameters.skipBuildArtifacts }}
+              skipTests: ${{ parameters.skipTests }}
+              condition: and(succeeded(), eq(variables['solutionFile.exists'], 'true'))
+
+          # ... embed them into their powershell modules
+          - task: DotNetCoreCLI@2
+            displayName: dotnet publish
+            condition: and(succeeded(), eq(variables['solutionFile.exists'], 'true'))
+            inputs:
+              command: publish
+              workingDirectory: $(Build.SourcesDirectory)
+              ${{ if eq(parameters.isRelease, true) }}:
+                arguments: --no-build --configuration Release
+              ${{ else }}:
+                arguments: --no-build --configuration Debug
+              modifyOutputPath: true
+              publishWebProjects: false
+              zipAfterPublish: false
+
+          # build and publish powershell modules (with their embedded binary pieces)
+          - template: /Steps/build-powershell-modules.yml
+            parameters:
+              path: $(Build.SourcesDirectory)/src
+              major: $(buildNumber.major)
+              minor: $(buildNumber.minor)
+              build: $(buildNumber.build)
+              revision: $(buildNumber.revision)
+              ${{ if eq(parameters.isRelease, true) }}:
+                configuration: Release
+              ${{ else }}:
+                configuration: Debug
+              skipBuildArtifacts: ${{ parameters.skipBuildArtifacts }}
+              skipTests: ${{ parameters.skipTests }}

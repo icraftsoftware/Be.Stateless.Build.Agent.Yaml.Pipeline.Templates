@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,19 +17,24 @@
 #endregion
 
 parameters:
-  - name: Major
+  - name: major
     type: number
-  - name: Minor
+  - name: minor
     type: number
-  - name: SkipTest
+  - name: skipTests
     type: boolean
     default: false
 
 stages:
-  - template: /Stages/build-powershell-module.yml
+  - template: /Stages/build-powershell-modules.yml
     parameters:
-      Configuration: Debug
-      Major: ${{ parameters.Major }}
-      Minor: ${{ parameters.Minor }}
-      SkipTest: ${{ parameters.SkipTest }}
-      SkipBuildArtifactPublication: true
+      major: ${{ parameters.major }}
+      minor: ${{ parameters.minor }}
+      isRelease: false
+      skipBuildArtifacts: ${{ ne(variables['Build.SourceBranch'], 'refs/heads/master') }}
+      skipTests: ${{ parameters.skipTests }}
+
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+      - template: /Stages/release-powershell-modules.yml
+        parameters:
+          isRelease: false

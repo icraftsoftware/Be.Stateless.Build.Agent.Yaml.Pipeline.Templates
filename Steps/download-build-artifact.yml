@@ -17,21 +17,17 @@
 #endregion
 
 parameters:
-  - name: ArtifactName
+  - name: path
     type: string
-  - name: DownloadPath
+  - name: name
     type: string
-  - name: Condition
-    type: string
-    default: ""
 
 steps:
-  - task: DownloadBuildArtifacts@0
-    displayName: Download Build Artifact '${{ parameters.ArtifactName }}'
-    ${{ if ne( parameters.Condition, '' ) }}:
-      condition: ${{ parameters.Condition }}
+  - task: DownloadPipelineArtifact@2
+    displayName: Download Pipeline Artifact '${{ parameters.name }}'
     inputs:
-      buildType: "current"
-      downloadType: "single"
-      artifactName: ${{ parameters.ArtifactName }}
-      downloadPath: ${{ parameters.DownloadPath }}
+      source: current
+      downloadType: specific
+      ${{ if ne(parameters.name, '' )}}:
+        patterns: ${{ parameters.name}}/**/*
+      path: ${{ parameters.path }}

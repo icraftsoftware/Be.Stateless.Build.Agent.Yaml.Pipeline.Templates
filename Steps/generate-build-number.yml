@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,18 +17,27 @@
 #endregion
 
 parameters:
-  - name: Major
+  - name: major
     type: number
-  - name: Minor
+  - name: minor
     type: number
+  - name: stepName
+    type: string
+  - name: isRelease
+    type: boolean
+    default: false
 
 steps:
   - powershell: |
-      $build = ('{0:yy}{1:000}' -f [datetime]::Today, [datetime]::Today.DayOfYear)
-      Write-Host "##vso[task.setvariable variable=VersionBuild;isOutput=true]$build"
-      $revision = [int](([datetime]::Now - [datetime]::Today).TotalSeconds / 1.4)
-      Write-Host "##vso[task.setvariable variable=VersionRevision;isOutput=true]$revision"
-      Write-Host "##vso[build.updatebuildnumber]${{ parameters.Major }}.${{ parameters.Minor }}.$build.$revision"
-      Write-Host "Build=$build|Revision=$revision"
+      $major=[int](${{ parameters.major }})
+      $minor=[int](${{ parameters.minor }})
+      $build = [int]('{0:yy}{1:000}' -f [DateTime]::Today, [DateTime]::Today.DayOfYear)
+      $revision = [int](([DateTime]::Now - [DateTime]::Today).TotalSeconds / 1.4)
+      $informationalRevision = if ([bool]::Parse('${{ parameters.isRelease }}')) { ".$revision" } else { "-preview$revision" }
+      Write-Host "##vso[task.setVariable variable=major;isOutput=true]$major"
+      Write-Host "##vso[task.setVariable variable=minor;isOutput=true]$minor"
+      Write-Host "##vso[task.setVariable variable=build;isOutput=true]$build"
+      Write-Host "##vso[task.setVariable variable=revision;isOutput=true]$revision"
+      Write-Host "##vso[build.updateBuildNumber]$major.$minor.$build$informationalRevision"
     displayName: Generate Build Number
-    name: generateBuildNumber
+    name: ${{ parameters.stepName }}

@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2021 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,22 +17,15 @@
 #endregion
 
 parameters:
-  - name: Configuration
+  - name: path
     type: string
-    values:
-      - Debug
-      - Release
-  - name: SearchTestAssemblyFolderPath
+  - name: condition
     type: string
+    default: succeeded()
 
 steps:
-  - task: VSTest@2
-    displayName: VSTest (${{ parameters.Configuration }})
-    inputs:
-      testSelector: "testAssemblies"
-      testAssemblyVer2: |
-        **\*.Tests.dll
-        !**\*TestAdapter.dll
-        !**\obj\**
-      searchFolder: ${{ parameters.SearchTestAssemblyFolderPath }}
-  #TODO use Coverlet
+  - powershell: |
+      $(Build.SourcesDirectory)\.build\pwsh\restore.ps1 -Path '${{ parameters.path }}'
+    displayName: Restore Required PowerShell Modules
+    name: restoreRequiredPowerShellModules
+    condition: ${{ parameters.condition }}

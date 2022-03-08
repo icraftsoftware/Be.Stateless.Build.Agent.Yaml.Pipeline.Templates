@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,17 +17,23 @@
 #endregion
 
 parameters:
-  - name: DownloadPath
-    type: string
-  - name: ArtifactPattern
-    type: string
+  - name: major
+    type: number
+  - name: minor
+    type: number
+  - name: skipTests
+    type: boolean
+    default: false
 
-steps:
-  - task: DownloadBuildArtifacts@0
-    displayName: Download Build Artifact Collection
-    inputs:
-      buildType: "current"
-      downloadType: "specific"
-      ${{ if ne( parameters.ArtifactPattern, '' )}}:
-        itemPattern: ${{ parameters.ArtifactPattern}}/**/*
-      downloadPath: ${{ parameters.DownloadPath }}
+stages:
+  - template: /Stages/build-biztalk-applications.yml
+    parameters:
+      major: ${{ parameters.major }}
+      minor: ${{ parameters.minor }}
+      isRelease: true
+      skipBuildArtifacts: false
+      skipTests: ${{ parameters.skipTests }}
+
+  - template: /Stages/release-biztalk-applications.yml
+    parameters:
+      isRelease: true

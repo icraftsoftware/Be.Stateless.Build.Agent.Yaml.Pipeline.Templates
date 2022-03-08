@@ -1,0 +1,92 @@
+﻿#region Copyright & License
+
+# Copyright © 2012 - 2022 François Chabot
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#endregion
+
+parameters:
+  - name: path
+    type: string
+  - name: major
+    type: string
+  - name: minor
+    type: string
+  - name: build
+    type: string
+  - name: revision
+    type: string
+  - name: configuration
+    type: string
+    values:
+      - Debug
+      - Release
+  - name: skipBuildArtifacts
+    type: boolean
+  - name: skipTests
+    type: boolean
+
+steps:
+  - template: /Steps/look-up-file.yml
+    parameters:
+      path: $(Build.SourcesDirectory)
+      filter: "*.Tests.ps1"
+      stepName: testFile
+
+  - ${{ if ne(parameters.skipTests, true) }}:
+      - template: /Steps/restore-powershell-modules.yml
+        parameters:
+          path: ${{ parameters.path }}
+          condition: and(succeeded(), eq(variables['testFile.exists'], 'true'))
+
+      - task: Pester@10
+        displayName: Run PowerShell Tests
+        condition: and(succeeded(), eq(variables['testFile.exists'], 'true'))
+        inputs:
+          scriptFolder: ${{ parameters.path }}
+          resultsFile: $(Build.SourcesDirectory)/powershell-module.tests.xml
+          usePSCore: False
+        continueOnError: true
+
+      - task: PublishTestResults@2
+        displayName: Publish PowerShell Test Results
+        condition: and(succeeded(), eq(variables['testFile.exists'], 'true'))
+        inputs:
+          testResultsFormat: NUnit
+          testResultsFiles: $(Build.SourcesDirectory)/powershell-module.tests.xml
+          mergeTestResults: true
+          failTaskOnFailedTests: true
+          testRunTitle: PowerShell Module Tests
+
+  - ${{ if ne(parameters.skipBuildArtifacts, true) }}:
+      - task: DownloadSecureFile@1
+        displayName: Download Private Signing Certificate
+        name: signingCertificate
+        inputs:
+          secureFile: be.stateless.pfx
+
+      - powershell: |
+          $(Build.SourcesDirectory)\.build\pwsh\build.ps1 -Path '${{ parameters.path }}' `
+            -Destination '$(Build.ArtifactStagingDirectory)/PowerShellModules' `
+            -ModuleVersion '${{ parameters.major }}.${{ parameters.minor }}.${{ parameters.build }}.${{ parameters.revision }}' `
+            -CertificatePath '$(signingCertificate.secureFilePath)' `
+            -CertificatePassword $(ConvertTo-SecureString '$(be-stateless-certificate-password)' -AsPlainText -Force) `
+            -Configuration ${{ parameters.configuration }}
+        displayName: Build PowerShell Module
+        condition: succeeded()
+
+      - template: /Steps/publish-build-artifact.yml
+        parameters:
+          name: PowerShellModules
+          condition: succeeded()

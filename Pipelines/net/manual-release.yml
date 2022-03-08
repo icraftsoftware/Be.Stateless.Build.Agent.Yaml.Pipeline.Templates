@@ -17,35 +17,30 @@
 #endregion
 
 parameters:
-  - name: Major
+  - name: major
     type: number
-  - name: Minor
+  - name: minor
     type: number
-  - name: BuildEngine
+  - name: toolSet
     type: string
+    default: dotnet
     values:
       - dotnet
       - msbuild
-    default: dotnet
-  - name: SkipTest
+  - name: skipTests
     type: boolean
     default: false
-  - name: TestEngine
-    type: string
-    values:
-      - dotnet
-      - vstest
-    default: dotnet
 
 stages:
-  - template: /Stages/build-dotnet.yml
+  - template: /Stages/build-dotnet-assemblies.yml
     parameters:
-      Major: ${{ parameters.Major }}
-      Minor: ${{ parameters.Minor }}
-      Configuration: Release
-      BuildEngine: ${{ parameters.BuildEngine }}
-      SkipTest: ${{ parameters.SkipTest }}
-      TestEngine: ${{ parameters.TestEngine }}
-      SkipBuildArtifactPublication: false
+      major: ${{ parameters.major }}
+      minor: ${{ parameters.minor }}
+      isRelease: true
+      toolSet: ${{ parameters.toolSet }}
+      skipBuildArtifacts: false
+      skipTests: ${{ parameters.skipTests }}
 
-  - template: /Stages/release-dotnet.yml
+  - template: /Stages/release-dotnet-assemblies.yml
+    parameters:
+      isRelease: true

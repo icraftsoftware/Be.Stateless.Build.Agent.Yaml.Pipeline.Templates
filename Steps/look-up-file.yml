@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@
 #endregion
 
 parameters:
-  - name: StepName
+  - name: path
+    type: string
+  - name: filter
+    type: string
+  - name: stepName
     type: string
 
 steps:
-  - task: DownloadSecureFile@1
-    name: ${{ parameters.StepName }}
-    displayName: Download Private Signing Certificate
-    inputs:
-      secureFile: "be.stateless.pfx"
+  - powershell: |
+      $found = [bool](Get-ChildItem -Path '${{ parameters.path }}' -Filter ${{ parameters.filter }} -File -Recurse)
+      Write-Host "##vso[task.setVariable variable=exists;isOutput=true]$found"
+    displayName: Look up for File ${{ parameters.filter }}
+    name: ${{ parameters.stepName }}

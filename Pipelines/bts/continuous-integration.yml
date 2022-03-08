@@ -1,6 +1,6 @@
 ﻿#region Copyright & License
 
-# Copyright © 2012 - 2022 François Chabot & Emmanuel Benitez
+# Copyright © 2012 - 2022 François Chabot
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,14 +26,15 @@ parameters:
     default: false
 
 stages:
-  - template: /Stages/build-powershell-modules.yml
+  - template: /Stages/build-biztalk-applications.yml
     parameters:
       major: ${{ parameters.major }}
       minor: ${{ parameters.minor }}
-      isRelease: true
-      skipBuildArtifacts: false
+      isRelease: false
+      skipBuildArtifacts: ${{ ne(variables['Build.SourceBranch'], 'refs/heads/master') }}
       skipTests: ${{ parameters.skipTests }}
 
-  - template: /Stages/release-powershell-modules.yml
-    parameters:
-      isRelease: true
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+      - template: /Stages/release-biztalk-applications.yml
+        parameters:
+          isRelease: false

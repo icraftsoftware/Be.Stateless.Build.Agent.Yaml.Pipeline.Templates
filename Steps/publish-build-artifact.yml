@@ -17,23 +17,22 @@
 #endregion
 
 parameters:
-  - name: ArtifactName
+  - name: name
     type: string
-  - name: PathToPublish
+  - name: condition
     type: string
+    default: ""
 
 steps:
-  - task: PowerShell@2
-    displayName: Check Availability of Build Artifact '${{ parameters.ArtifactName }}' to Publish
-    name: ${{ format('check{0}BuildArtifactAvailable', parameters.ArtifactName) }}
-    inputs:
-      targetType: inline
-      script: Write-Host "##vso[task.setvariable variable=IsBuildArtifactAvailable;isOutput=true]$(Test-Path -Path ${{ parameters.PathToPublish }}\*)"
+  - template: /Steps/look-up-file.yml
+    parameters:
+      path: $(Build.ArtifactStagingDirectory)/${{ parameters.name }}
+      filter: "*"
+      stepName: ${{ format('{0}BuildArtifact', parameters.name) }}
 
-  - task: PublishBuildArtifacts@1
-    displayName: Publish Build Artifact '${{ parameters.ArtifactName }}'
-    condition: eq(variables['${{ format('check{0}BuildArtifactAvailable', parameters.ArtifactName)}}.IsBuildArtifactAvailable'], 'true')
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Pipeline Artifact '${{ parameters.name }}'
+    condition: eq(variables['${{ format('{0}BuildArtifact', parameters.name)}}.exists'], 'true')
     inputs:
-      PathToPublish: ${{ parameters.PathToPublish }}
-      ArtifactName: ${{ parameters.ArtifactName }}
-      publishLocation: "Container"
+      targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.name }}
+      artifactName: ${{ parameters.name }}

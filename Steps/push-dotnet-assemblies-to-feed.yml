@@ -1,0 +1,48 @@
+﻿#region Copyright & License
+
+# Copyright © 2012 - 2022 François Chabot
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#endregion
+
+parameters:
+  - name: path
+    type: string
+  - name: feed
+    type: string
+    values:
+      - external
+      - internal
+
+steps:
+  - ${{ if eq(parameters.feed, 'external') }}:
+      - task: NuGetCommand@2
+        displayName: Publish .NET Assemblies to nuget.org Feed
+        inputs:
+          command: push
+          packagesToPush: "${{ parameters.path }}/**/*.nupkg"
+          nuGetFeedType: external
+          publishFeedCredentials: nuget.org_be.stateless
+          verbosityPush: Normal
+
+  - ${{ if eq(parameters.feed, 'internal') }}:
+      - task: NuGetCommand@2
+        displayName: Publish .NET Assemblies to BizTalk.Factory.Preview Feed
+        inputs:
+          command: push
+          packagesToPush: "${{ parameters.path }}/**/*.nupkg"
+          nuGetFeedType: internal
+          publishVstsFeed: be.stateless/BizTalk.Factory.Preview
+          allowPackageConflicts: true
+          verbosityPush: Normal
