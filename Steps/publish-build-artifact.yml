@@ -31,8 +31,8 @@ steps:
       stepName: ${{ format('{0}BuildArtifact', parameters.name) }}
 
   - task: PublishPipelineArtifact@1
-    displayName: Publish Pipeline Artifact '${{ parameters.name }}'
-    condition: eq(variables['${{ format('{0}BuildArtifact', parameters.name)}}.exists'], 'true')
+    displayName: Publish Pipeline Artifact ${{ parameters.name }}
+    condition: eq(variables['${{ format('{0}BuildArtifact', parameters.name) }}.exists'], 'true')
     inputs:
       targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.name }}
       artifactName: ${{ parameters.name }}

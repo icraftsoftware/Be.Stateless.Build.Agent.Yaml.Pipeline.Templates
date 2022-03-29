@@ -59,9 +59,8 @@ steps:
     inputs:
       command: restore
       workingDirectory: ${{ parameters.path }}
-      feedsToUse: select
-      vstsFeed: be.stateless/BizTalk.Server.Library
-      includeNuGetOrg: true
+      feedsToUse: "config"
+      nugetConfigPath: "$(Build.SourcesDirectory)/nuget.config"
       verbosityRestore: Minimal
 
   - ${{ if eq(parameters.toolSet, 'dotnet') }}:

@@ -26,9 +26,16 @@ parameters:
       - internal
 
 steps:
+  - template: /Steps/look-up-file.yml
+    parameters:
+      path: $(Build.ArtifactStagingDirectory)/NugetPackages
+      filter: "*.nupkg"
+      stepName: nuGetPackageFile
+
   - ${{ if eq(parameters.feed, 'external') }}:
       - task: NuGetCommand@2
         displayName: Publish .NET Assemblies to nuget.org Feed
+        condition: eq(variables['nuGetPackageFile.exists'], 'true')
         inputs:
           command: push
           packagesToPush: "${{ parameters.path }}/**/*.nupkg"
@@ -39,6 +46,7 @@ steps:
   - ${{ if eq(parameters.feed, 'internal') }}:
       - task: NuGetCommand@2
         displayName: Publish .NET Assemblies to BizTalk.Factory.Preview Feed
+        condition: eq(variables['nuGetPackageFile.exists'], 'true')
         inputs:
           command: push
           packagesToPush: "${{ parameters.path }}/**/*.nupkg"

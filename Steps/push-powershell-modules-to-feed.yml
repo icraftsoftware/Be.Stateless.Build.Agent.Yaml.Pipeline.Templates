@@ -28,7 +28,7 @@ parameters:
 steps:
   - ${{ if eq(parameters.feed, 'external') }}:
       - powershell: |
-          $(Build.SourcesDirectory)\.build\pwsh\push.ps1 -Path '${{ parameters.path }}' -Repository 'PSGallery' -NuGetApiKey $(powershell-gallery-api-key)
+          $(Build.SourcesDirectory)\.build\pwsh\push.ps1 -Path '${{ parameters.path }}' -Repository PSGallery -NuGetApiKey $(powershell-gallery-api-key)
         displayName: Publish PowerShell Modules to PowerShell Gallery Feed
 
   - ${{ if eq(parameters.feed, 'internal') }}:

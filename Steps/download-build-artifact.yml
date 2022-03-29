@@ -24,10 +24,10 @@ parameters:
 
 steps:
   - task: DownloadPipelineArtifact@2
-    displayName: Download Pipeline Artifact '${{ parameters.name }}'
+    displayName: Download Pipeline Artifact ${{ parameters.name }}
     inputs:
       source: current
       downloadType: specific
-      ${{ if ne(parameters.name, '' )}}:
-        patterns: ${{ parameters.name}}/**/*
+      ${{ if ne(parameters.name, '' ) }}:
+        patterns: ${{ parameters.name }}/**/*
       path: ${{ parameters.path }}
