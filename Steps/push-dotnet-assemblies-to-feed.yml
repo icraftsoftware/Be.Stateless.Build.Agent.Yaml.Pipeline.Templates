@@ -32,6 +32,11 @@ steps:
       filter: "*.nupkg"
       stepName: nuGetPackageFile
 
+  - task: NuGetToolInstaller@1
+    inputs:
+      versionSpec: ">=5.4.0"
+      checkLatest: true
+
   - ${{ if eq(parameters.feed, 'external') }}:
       - task: NuGetCommand@2
         displayName: Publish .NET Assemblies to nuget.org Feed
