@@ -33,6 +33,8 @@ steps:
       stepName: nuGetPackageFile
 
   - task: NuGetToolInstaller@1
+    displayName: Installing NuGet Tools
+    condition: eq(variables['nuGetPackageFile.exists'], 'true')
     inputs:
       versionSpec: ">=5.4.0"
       checkLatest: true
