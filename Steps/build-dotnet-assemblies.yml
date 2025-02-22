@@ -47,6 +47,11 @@ parameters:
     default: succeeded()
 
 steps:
+  - task: UseDotNet@2
+    displayName: Acquire .NET SDK 8
+    inputs:
+      version: 8.x
+
   - task: DownloadSecureFile@1
     name: signingKey
     displayName: Download Private Signing Key
